@@ -1,16 +1,15 @@
 package main
 
 import (
-	"fmt"
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
-
-	"lanchonete/bootstrap"
-	"lanchonete/internal/interfaces/http/server"
-	_"lanchonete/docs"
+	// "lanchonete/bootstrap"
+	// "lanchonete/internal/interfaces/http/server"
+	// _"lanchonete/docs"
 )
 
 // @title Lanchonete API - Tech Challenge 2
@@ -19,6 +18,7 @@ import (
 
 // @host localhost:8080
 // @BasePath /
+//
 //go:generate go run github.com/swaggo/swag/cmd/swag@latest init
 func main() {
 	fmt.Println("🔧 Iniciando aplicação...")
