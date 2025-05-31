@@ -25,7 +25,6 @@ func NewEnv() *Env {
 
 	viper.AutomaticEnv()
 
-
 	return &Env{
 		ServerAddress: viper.GetString("SERVER_ADDRESS"),
 		Port:          viper.GetString("PORT"),

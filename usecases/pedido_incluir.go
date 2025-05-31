@@ -21,7 +21,7 @@ func NewPedidoIncluirUseCase(pedidoRepository repository.PedidoRepository) Pedid
 }
 
 func (pduc *pedidoIncluirUseCase) Run(c context.Context, clienteCPF string, produtos []entities.Produto) (*entities.Pedido, error) {
-	pedido, err := entities.PedidoNew(clienteCPF, produtos)  // Aqui!
+	pedido, err := entities.PedidoNew(clienteCPF, produtos) // Aqui!
 	if err != nil {
 		return nil, err
 	}
@@ -31,4 +31,3 @@ func (pduc *pedidoIncluirUseCase) Run(c context.Context, clienteCPF string, prod
 	}
 	return pedido, nil
 }
-

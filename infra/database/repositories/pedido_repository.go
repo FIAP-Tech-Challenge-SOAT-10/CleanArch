@@ -143,18 +143,18 @@ func (pr *pedidoMysqlRepository) ListarTodosOsPedidos(c context.Context) ([]*ent
 
 		// pega a data atual (ano, mês e dia)
 		now := time.Now()
-		dataHoje := now.Format("2006-01-02")  // ex: "2025-05-28"
+		dataHoje := now.Format("2006-01-02") // ex: "2025-05-28"
 
 		// concatena uma data fixa com o horário recebido
-		datetimeStr := dataHoje + " " + tempoEstimadoStr  // data fixa arbitrária
+		datetimeStr := dataHoje + " " + tempoEstimadoStr // data fixa arbitrária
 
 		// parse para time.Time completo
 		_, err := time.Parse("2006-01-02 15:04:05", datetimeStr)
 		if err != nil {
 			return nil, fmt.Errorf("erro ao converter tempoEstimado: %w", err)
 		}
-					
-		p.TimeStamp = "00:15:00"  // Definindo um valor fixo para o TimeStamp
+
+		p.TimeStamp = "00:15:00" // Definindo um valor fixo para o TimeStamp
 		p.ClienteCPF = clienteCPF
 		p.Produtos = []entities.Produto{}
 
@@ -184,8 +184,8 @@ func (pr *pedidoMysqlRepository) ListarTodosOsPedidos(c context.Context) ([]*ent
 			}
 
 			p := entities.Produto{
-				ID: idProduto,
-				Nome:   nomeProduto,
+				ID:   idProduto,
+				Nome: nomeProduto,
 			}
 
 			produtos = append(produtos, p)

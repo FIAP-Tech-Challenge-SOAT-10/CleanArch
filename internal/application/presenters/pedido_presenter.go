@@ -19,7 +19,7 @@ type PedidoDTO struct {
 
 // ItemPedidoDTO representa os dados de um item de pedido para apresentação
 type ItemPedidoDTO struct {
-	ProdutoID     int	  `json:"produtoId"`
+	ProdutoID     int     `json:"produtoId"`
 	NomeProduto   string  `json:"nomeProduto"`
 	Quantidade    int     `json:"quantidade"`
 	PrecoUnitario float32 `json:"precoUnitario"`
@@ -44,6 +44,6 @@ func NewPedidoDTO(p *entities.Pedido) *PedidoDTO {
 		TempoEstimado: time.Duration(900), // Default 15 minutes
 		Itens:         itens,
 		Cliente:       p.ClienteCPF,
-		Total: p.Total,
+		Total:         p.Total,
 	}
-} 
+}

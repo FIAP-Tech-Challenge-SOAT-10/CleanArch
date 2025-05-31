@@ -3,9 +3,9 @@ package route
 import (
 	"database/sql"
 	"lanchonete/bootstrap"
-	"lanchonete/usecases"
 	repo "lanchonete/infra/database/repositories"
 	handler "lanchonete/internal/interfaces/http/handlers"
+	"lanchonete/usecases"
 
 	"github.com/gin-gonic/gin"
 )

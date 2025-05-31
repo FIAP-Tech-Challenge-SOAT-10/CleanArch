@@ -114,7 +114,7 @@ func (pr *produtoMysqlRepository) RemoverProduto(c context.Context, id int) erro
 func (pr *produtoMysqlRepository) ListarPorCategoria(c context.Context, categoria string) ([]*entities.Produto, error) {
 	query := "SELECT idProduto, nomeProduto, descricaoProduto, precoProduto, personalizacaoProduto, categoriaProduto FROM Produto WHERE categoriaProduto = ?"
 	rows, err := pr.database.QueryContext(c, query, categoria)
-	
+
 	if err != nil {
 		return nil, fmt.Errorf("erro ao buscar produtos por categoria: %v", err)
 	}

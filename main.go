@@ -7,9 +7,10 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	// "lanchonete/bootstrap"
-	// "lanchonete/internal/interfaces/http/server"
-	// _"lanchonete/docs"
+
+	"lanchonete/bootstrap"
+	_ "lanchonete/docs"
+	"lanchonete/internal/interfaces/http/server"
 )
 
 // @title Lanchonete API - Tech Challenge 2

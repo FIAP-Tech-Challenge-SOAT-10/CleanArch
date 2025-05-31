@@ -21,6 +21,6 @@ func NewAcompanhamentoDTO(a *entities.AcompanhamentoPedido) *AcompanhamentoDTO {
 	return &AcompanhamentoDTO{
 		ID:            fmt.Sprintf("%d", a.ID),
 		Pedidos:       pedidos,
-		TempoEstimado: fmt.Sprintf("%d", a.TempoEstimado),
+		TempoEstimado: a.TempoEstimado,
 	}
 }

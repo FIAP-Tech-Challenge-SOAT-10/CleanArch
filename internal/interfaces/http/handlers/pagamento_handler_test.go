@@ -66,7 +66,7 @@ func TestEnviarPagamento(t *testing.T) {
 		{
 			name: "successful payment sending",
 			pagamento: entities.Pagamento{
-				IdPagamento:  123,
+				IdPagamento: 123,
 				Status:      "pending",
 				Valor:       100.00,
 				DataCriacao: time.Now().Format("2006-01-02 15:04:05"),
@@ -77,7 +77,7 @@ func TestEnviarPagamento(t *testing.T) {
 		{
 			name: "error sending payment",
 			pagamento: entities.Pagamento{
-				IdPagamento:  123,
+				IdPagamento: 123,
 				Status:      "pending",
 				Valor:       100.00,
 				DataCriacao: time.Now().Format("2006-01-02 15:04:05"),
@@ -126,7 +126,7 @@ func TestConfirmarPagamento(t *testing.T) {
 		{
 			name: "successful payment confirmation",
 			pagamento: entities.Pagamento{
-				IdPagamento:  123,
+				IdPagamento: 123,
 				Status:      "confirmed",
 				Valor:       100.00,
 				DataCriacao: time.Now().Format("2006-01-02 15:04:05"),
@@ -137,7 +137,7 @@ func TestConfirmarPagamento(t *testing.T) {
 		{
 			name: "error confirming payment",
 			pagamento: entities.Pagamento{
-				IdPagamento:  123,
+				IdPagamento: 123,
 				Status:      "confirmed",
 				Valor:       100.00,
 				DataCriacao: time.Now().Format("2006-01-02 15:04:05"),
@@ -172,4 +172,4 @@ func TestConfirmarPagamento(t *testing.T) {
 			mockConfirmarPagamento.AssertExpectations(t)
 		})
 	}
-} 
+}

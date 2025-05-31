@@ -30,11 +30,11 @@ func NewProdutoHandler(produtoIncluirUseCase usecases.ProdutoIncluirUseCase,
 	produtoRemoverUseCase usecases.ProdutoRemoverUseCase,
 	produtoListarPorCategoriaUseCase usecases.ProdutoListarPorCategoriaUseCase) *ProdutoHandler {
 	return &ProdutoHandler{
-		ProdutoIncluirUseCase:     produtoIncluirUseCase,
-		ProdutoBuscarPorIdUseCase: produtoBuscarPorIdUseCase,
-		ProdutoEditarUseCase:      produtoEditarUseCase,
-		ProdutoListarTodosUseCase: produtoListarTodosUseCase,
-		ProdutoRemoverUseCase:     produtoRemoverUseCase,
+		ProdutoIncluirUseCase:            produtoIncluirUseCase,
+		ProdutoBuscarPorIdUseCase:        produtoBuscarPorIdUseCase,
+		ProdutoEditarUseCase:             produtoEditarUseCase,
+		ProdutoListarTodosUseCase:        produtoListarTodosUseCase,
+		ProdutoRemoverUseCase:            produtoRemoverUseCase,
 		ProdutoListarPorCategoriaUseCase: produtoListarPorCategoriaUseCase,
 	}
 }
@@ -85,7 +85,7 @@ func (ph *ProdutoHandler) ProdutoIncluir(c *gin.Context) {
 func (ph *ProdutoHandler) ProdutoBuscarPorId(c *gin.Context) {
 	id := c.Param("id")
 
-	idnt, err := strconv.Atoi(id)
+	idnt, _ := strconv.Atoi(id)
 	prd, err := ph.ProdutoBuscarPorIdUseCase.Run(c, idnt)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, response.ErrorResponse{Message: "ID inválido"})
@@ -130,7 +130,7 @@ func (ph *ProdutoHandler) ProdutoEditar(c *gin.Context) {
 	var produto entities.Produto
 
 	err := c.ShouldBindJSON(&produto)
-	
+
 	if err != nil {
 		fmt.Println("Entrando no primeiro erro")
 		c.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
@@ -163,8 +163,8 @@ func (ph *ProdutoHandler) ProdutoEditar(c *gin.Context) {
 func (ph *ProdutoHandler) ProdutoRemover(c *gin.Context) {
 	id := c.Param("id")
 
-	idnt, err := strconv.Atoi(id)
-	err = ph.ProdutoRemoverUseCase.Run(c, idnt)
+	idnt, _ := strconv.Atoi(id)
+	err := ph.ProdutoRemoverUseCase.Run(c, idnt)
 	if err != nil {
 		if strings.Contains(err.Error(), "produto não encontrado") {
 			c.JSON(http.StatusNotFound, response.ErrorResponse{Message: err.Error()})

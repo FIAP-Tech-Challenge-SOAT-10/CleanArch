@@ -3,8 +3,8 @@ package route
 import (
 	"database/sql"
 	"lanchonete/bootstrap"
-	"lanchonete/internal/application/usecases"
 	repo "lanchonete/infra/database/repositories"
+	"lanchonete/internal/application/usecases"
 	handler "lanchonete/internal/interfaces/http/handlers"
 
 	"github.com/gin-gonic/gin"
@@ -15,7 +15,7 @@ func NewPagamentoRouter(env *bootstrap.Env, db *sql.DB, router *gin.RouterGroup)
 	pagamentoRepo := repo.NewPagamentoMysqlRepository(db)
 
 	pc := &handler.PagamentoHandler{
-		EnviarPagamentoUseCase: usecases.NewEnviarPagamentoUseCase(pagamentoRepo),
+		EnviarPagamentoUseCase:    usecases.NewEnviarPagamentoUseCase(pagamentoRepo),
 		ConfirmarPagamentoUseCase: usecases.NewConfirmarPagamentoUseCase(pagamentoRepo),
 	}
 

@@ -58,7 +58,6 @@ func (m *MockProdutoListarPorCategoriaUseCase) Run(c context.Context, categoria 
 	return args.Get(0).([]*entities.Produto), args.Error(1)
 }
 
-
 // --- Test ---
 
 func TestProdutoHandler_ProdutoIncluir(t *testing.T) {
@@ -69,10 +68,10 @@ func TestProdutoHandler_ProdutoIncluir(t *testing.T) {
 	}
 
 	prod := entities.Produto{
-		Nome:          "Coca-Cola",
-		Categoria:     "Bebida",
-		Descricao:     "Refrigerante",
-		Preco:         5.0,
+		Nome:      "Coca-Cola",
+		Categoria: "Bebida",
+		Descricao: "Refrigerante",
+		Preco:     5.0,
 	}
 	mockUC.On("Run", mock.Anything, prod.Nome, prod.Categoria, prod.Descricao, prod.Preco).
 		Return(&prod, nil)

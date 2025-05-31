@@ -16,14 +16,14 @@ import (
 )
 
 type Server struct {
-	app        *bootstrap.App
-	router     *gin.Engine
-	setupOnce  sync.Once
+	app       *bootstrap.App
+	router    *gin.Engine
+	setupOnce sync.Once
 }
 
 func NewServer(app *bootstrap.App) *Server {
 	router := gin.Default()
-	
+
 	fmt.Printf("🆕 Instância de Server criada: %p\n", router)
 
 	router.Use(cors.New(cors.Config{

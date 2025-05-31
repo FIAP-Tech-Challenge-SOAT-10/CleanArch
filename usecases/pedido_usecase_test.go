@@ -60,20 +60,20 @@ func TestPedidoUseCase_Run_MultiplePedidos(t *testing.T) {
 	}
 
 	pedidos := []struct {
-		Cliente        entities.Cliente
-		Produtos       []entities.Produto
+		Cliente  entities.Cliente
+		Produtos []entities.Produto
 	}{
 		{
-			Cliente:        entities.Cliente{Nome: "João", CPF: "11111111111"},
-			Produtos:       []entities.Produto{produtos[0], produtos[1]},
+			Cliente:  entities.Cliente{Nome: "João", CPF: "11111111111"},
+			Produtos: []entities.Produto{produtos[0], produtos[1]},
 		},
 		{
-			Cliente:        entities.Cliente{Nome: "Maria", CPF: "22222222222"},
-			Produtos:       []entities.Produto{produtos[0], produtos[2]},
+			Cliente:  entities.Cliente{Nome: "Maria", CPF: "22222222222"},
+			Produtos: []entities.Produto{produtos[0], produtos[2]},
 		},
 		{
-			Cliente:        entities.Cliente{Nome: "Pedro", CPF: "33333333333"},
-			Produtos:       []entities.Produto{produtos[0], produtos[1], produtos[2]},
+			Cliente:  entities.Cliente{Nome: "Pedro", CPF: "33333333333"},
+			Produtos: []entities.Produto{produtos[0], produtos[1], produtos[2]},
 		},
 	}
 

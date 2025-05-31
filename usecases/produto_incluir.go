@@ -24,7 +24,6 @@ func NewProdutoIncluirUseCase(produtoRepository repository.ProdutoRepository) Pr
 func (pd *produtoIncluirUseCase) Run(c context.Context, nome string, categoria string, descricao string, preco float32) (*entities.Produto, error) {
 
 	produto, err := entities.ProdutoNew(nome, categoria, descricao, preco)
-	
 
 	if err != nil {
 		return nil, fmt.Errorf("criação de produto inválida: %w", err)

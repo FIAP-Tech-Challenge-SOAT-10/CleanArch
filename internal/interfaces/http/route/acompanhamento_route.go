@@ -3,9 +3,9 @@ package route
 import (
 	"database/sql"
 	"lanchonete/bootstrap"
+	repo "lanchonete/infra/database/repositories"
 	appusecases "lanchonete/internal/application/usecases"
 	handler "lanchonete/internal/interfaces/http/handlers"
-	repo "lanchonete/infra/database/repositories"
 	"lanchonete/usecases"
 
 	"fmt"

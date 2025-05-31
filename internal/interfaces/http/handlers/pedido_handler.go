@@ -54,7 +54,7 @@ func (h *PedidoHandler) CriarPedido(r *gin.Context) {
 		r.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 		return
 	}
-	
+
 	// Substituir o array de produtos com os dados completos do banco
 	produtosCompletos := []entities.Produto{}
 
@@ -119,10 +119,10 @@ func (h *PedidoHandler) BuscarPedido(r *gin.Context) {
 // @Failure 400 {object} response.ErrorResponse
 func (h *PedidoHandler) AtualizarStatusPedido(r *gin.Context) {
 	nroPedido := r.Param("nroPedido")
-	id, err := strconv.Atoi(nroPedido)
+	id, _ := strconv.Atoi(nroPedido)
 	status := r.Param("status")
 	fmt.Println("Atualizando pedido", id, status)
-	err = h.PedidoAtualizarStatusUseCase.Run(r, id, status)
+	err := h.PedidoAtualizarStatusUseCase.Run(r, id, status)
 	if err != nil {
 		r.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 		return

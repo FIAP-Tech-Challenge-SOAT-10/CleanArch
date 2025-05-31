@@ -22,7 +22,6 @@ func (uc *acompanhamentoUseCase) CriarAcompanhamento(c context.Context) (int, er
 	return uc.acompanhamentoRepo.CriarAcompanhamento(c)
 }
 
-
 func (uc *acompanhamentoUseCase) AdicionarPedido(c context.Context, acompanhamentoID int, pedidoID int) error {
 	return uc.acompanhamentoRepo.AdicionarPedido(c, acompanhamentoID, pedidoID)
 }

@@ -10,7 +10,7 @@ import (
 )
 
 type App struct {
-	Env                    *Env
+	Env                      *Env
 	DB                       *sql.DB
 	AcompanhamentoRepository repository.AcompanhamentoRepository
 	PedidoRepository         repository.PedidoRepository
@@ -39,8 +39,8 @@ func NewApp(ctx context.Context) (*App, error) {
 	acompanhamentoRepo, pedidoRepo, produtoRepo, clienteRepo, pagamentoRepo := NewRepositories(db)
 
 	return &App{
-		Env:                    env,
-		DB:                     db,
+		Env:                      env,
+		DB:                       db,
 		AcompanhamentoRepository: acompanhamentoRepo,
 		PedidoRepository:         pedidoRepo,
 		ProdutoRepository:        produtoRepo,

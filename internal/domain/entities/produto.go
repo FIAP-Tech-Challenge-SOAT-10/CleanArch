@@ -25,7 +25,6 @@ type Produto struct {
 	Preco          float32        `json:"precoProduto"`
 }
 
-
 func ProdutoNew(nome string, categoria string, descricao string, preco float32) (*Produto, error) {
 	fmt.Println("Nome:", nome, "\nCategoria: ", categoria, "\nDescrição:", descricao, "\nPreço:", preco)
 	if strings.TrimSpace(nome) == "" || preco <= 0 || strings.TrimSpace(categoria) == "" {
@@ -42,9 +41,9 @@ func ProdutoNew(nome string, categoria string, descricao string, preco float32) 
 	}
 
 	return &Produto{
-		Nome:          nome,
-		Categoria:     cat_prod,
-		Descricao:     descricao,
-		Preco:         preco,
+		Nome:      nome,
+		Categoria: cat_prod,
+		Descricao: descricao,
+		Preco:     preco,
 	}, nil
 }

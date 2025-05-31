@@ -6,11 +6,11 @@ import (
 )
 
 type Pagamento struct {
-	IdPagamento  int
-	IdPedido     int
-	Valor        float64
-	Status       string
-	DataCriacao  string
+	IdPagamento int
+	IdPedido    int
+	Valor       float64
+	Status      string
+	DataCriacao string
 }
 
 func PagamentoNew(idPagamento, idPedido int, valor float64, status, dataCriacao string) (*Pagamento, error) {
