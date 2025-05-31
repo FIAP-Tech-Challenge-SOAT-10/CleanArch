@@ -70,14 +70,15 @@ func TestAcompanhamentoHandler_AdicionarPedido(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	handler, mockAcompanhamento, _ := setupAcompanhamentoHandlerWithMocks()
 
-	mockAcompanhamento.On("AdicionarPedido", mock.Anything, "acomp1", mock.AnythingOfType("*entities.Pedido")).Return(nil)
+	// Use integer IDs as expected by the mock
+	mockAcompanhamento.On("AdicionarPedido", mock.Anything, 1, 2).Return(nil)
 
-	req, _ := http.NewRequest(http.MethodPost, "/acompanhamento/acomp1/ped1", nil)
+	req, _ := http.NewRequest(http.MethodPost, "/acompanhamento/1/2", nil)
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Params = gin.Params{
-		{Key: "IDAcompanhamento", Value: "acomp1"},
-		{Key: "IDPedido", Value: "ped1"},
+		{Key: "IDAcompanhamento", Value: "1"},
+		{Key: "IDPedido", Value: "2"},
 	}
 	c.Request = req
 
@@ -108,16 +109,17 @@ func TestAcompanhamentoHandler_AtualizarStatusPedido(t *testing.T) {
 	handler, mockAcompanhamento, _ := setupAcompanhamentoHandlerWithMocks()
 
 	statusReq := StatusUpdateRequest{Status: "Finalizado"}
-	mockAcompanhamento.On("AtualizarStatusPedido", mock.Anything, "acomp1", entities.StatusPedido("Finalizado")).Return(nil)
+	mockAcompanhamento.On("AtualizarStatusPedido", mock.Anything, 1, entities.StatusPedido("Finalizado")).Return(nil)
+	mockAcompanhamento.On("BuscarPedidos", mock.Anything, 2).Return([]entities.Pedido{}, nil)
 
 	body, _ := json.Marshal(statusReq)
-	req, _ := http.NewRequest(http.MethodPut, "/acompanhamento/acomp1/pedido/ped1/status", bytes.NewBuffer(body))
+	req, _ := http.NewRequest(http.MethodPut, "/acompanhamento/1/pedido/2/status", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Params = gin.Params{
-		{Key: "IDAcompanhamento", Value: "acomp1"},
-		{Key: "IDPedido", Value: "ped1"},
+		{Key: "IDAcompanhamento", Value: "1"},
+		{Key: "IDPedido", Value: "2"},
 	}
 	c.Request = req
 

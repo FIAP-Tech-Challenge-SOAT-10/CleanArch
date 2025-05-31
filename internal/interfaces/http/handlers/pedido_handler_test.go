@@ -85,11 +85,12 @@ func TestPedidoHandler_CriarPedido(t *testing.T) {
 	handler, mockIncluir, _, _, mockProdutoBuscar, _ := setupPedidoHandlerWithMocks()
 
 	cliente := entities.Cliente{Nome: "Cliente Teste", Email: "cli@teste.com", CPF: "123"}
-	produto := entities.Produto{Nome: "Produto Teste", Categoria: entities.Lanche, Preco: 10}
-	pedido := entities.Pedido{ClienteCPF: cliente.CPF, Produtos: []entities.Produto{produto}}
+	produto := entities.Produto{ID: 1, Nome: "Produto Teste", Categoria: entities.Lanche, Preco: 10}
+	pedido := entities.Pedido{ID: 1, ClienteCPF: cliente.CPF, Produtos: []entities.Produto{produto}}
 
-	mockProdutoBuscar.On("Run", mock.Anything, produto.Nome).Return(&produto, nil)
-	mockIncluir.On("Run", mock.Anything, cliente.CPF, []entities.Produto{produto}, "Sem cebola").
+	mockProdutoBuscar.On("Run", mock.Anything, produto.ID).Return(&produto, nil)
+	// mockIncluir.On("Run", mock.Anything, cliente.CPF, []entities.Produto{produto}, "Sem cebola").
+	mockIncluir.On("Run", mock.Anything, cliente.CPF, []entities.Produto{produto}).
 		Return(&entities.Pedido{ID: 1}, nil)
 
 	body, _ := json.Marshal(pedido)
@@ -125,13 +126,13 @@ func TestPedidoHandler_AtualizarStatusPedido(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	handler, _, _, mockAtualizar, _, _ := setupPedidoHandlerWithMocks()
 
-	mockAtualizar.On("Run", mock.Anything, "ped1", "Finalizado").Return(nil)
+	mockAtualizar.On("Run", mock.Anything, 1, "Finalizado").Return(nil)
 
-	req, _ := http.NewRequest(http.MethodPut, "/pedidos/ped1/status/Finalizado", nil)
+	req, _ := http.NewRequest(http.MethodPut, "/pedidos/1/status/Finalizado", nil)
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Params = gin.Params{
-		{Key: "nroPedido", Value: "ped1"},
+		{Key: "nroPedido", Value: "1"},
 		{Key: "status", Value: "Finalizado"},
 	}
 	c.Request = req

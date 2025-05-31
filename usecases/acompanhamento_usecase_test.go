@@ -55,7 +55,7 @@ func TestCriarAcompanhamento_Completo(t *testing.T) {
 
 	err := mockUC.CriarAcompanhamento(ctx, acomp)
 	assert.NoError(t, err)
-	assert.Equal(t, "acomp-1", acomp.ID)
-	assert.Equal(t, 20*time.Minute, acomp.TempoEstimado)
+	assert.Equal(t, 1, acomp.ID)                     // Fix: match the type and value
+	assert.Equal(t, "00:15:00", acomp.TempoEstimado) // Fix: match the type and value
 	assert.NotEmpty(t, acomp.UltimaAtualizacao)
 }

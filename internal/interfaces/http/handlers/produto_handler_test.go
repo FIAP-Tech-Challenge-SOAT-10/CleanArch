@@ -73,7 +73,7 @@ func TestProdutoHandler_ProdutoIncluir(t *testing.T) {
 		Descricao: "Refrigerante",
 		Preco:     5.0,
 	}
-	mockUC.On("Run", mock.Anything, prod.Nome, prod.Categoria, prod.Descricao, prod.Preco).
+	mockUC.On("Run", mock.Anything, prod.Nome, string(prod.Categoria), prod.Descricao, prod.Preco).
 		Return(&prod, nil)
 
 	body, _ := json.Marshal(prod)
@@ -96,12 +96,12 @@ func TestProdutoHandler_ProdutoBuscarPorId(t *testing.T) {
 	}
 
 	prod := &entities.Produto{Nome: "Coca-Cola"}
-	mockUC.On("Run", mock.Anything, "1").Return(prod, nil)
+	mockUC.On("Run", mock.Anything, 1).Return(prod, nil)
 
 	req, _ := http.NewRequest(http.MethodGet, "/produto/1", nil)
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	c.Params = gin.Params{{Key: "nome", Value: "1"}}
+	c.Params = gin.Params{{Key: "id", Value: "1"}}
 	c.Request = req
 
 	handler.ProdutoBuscarPorId(c)
@@ -137,12 +137,13 @@ func TestProdutoHandler_ProdutoEditar(t *testing.T) {
 	}
 
 	prod := entities.Produto{
+		ID:        1,
 		Nome:      "Coca-Cola",
 		Categoria: "Bebida",
 		Descricao: "Refrigerante",
 		Preco:     5.0,
 	}
-	mockUC.On("Run", mock.Anything, prod.Nome, string(prod.Categoria), prod.Descricao, prod.Preco).
+	mockUC.On("Run", mock.Anything, 1, prod.Nome, string(prod.Categoria), prod.Descricao, prod.Preco).
 		Return(&prod, nil)
 
 	body, _ := json.Marshal(prod)
@@ -164,12 +165,12 @@ func TestProdutoHandler_ProdutoRemover(t *testing.T) {
 		ProdutoRemoverUseCase: mockUC,
 	}
 
-	mockUC.On("Run", mock.Anything, "1").Return(nil)
+	mockUC.On("Run", mock.Anything, 1).Return(nil)
 
 	req, _ := http.NewRequest(http.MethodDelete, "/produto/1", nil)
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	c.Params = gin.Params{{Key: "nome", Value: "1"}}
+	c.Params = gin.Params{{Key: "id", Value: "1"}}
 	c.Request = req
 
 	handler.ProdutoRemover(c)

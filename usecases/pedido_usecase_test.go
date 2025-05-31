@@ -16,6 +16,10 @@ type MockPedidoRepository struct {
 func (m *MockPedidoRepository) CriarPedido(ctx context.Context, pedido *entities.Pedido) error {
 	// Simulate duplicate check
 	for _, p := range m.Pedidos {
+		if pedido.ID == 0 {
+			pedido.ID = len(m.Pedidos) + 1
+		}
+
 		if p.ID == pedido.ID {
 			return errors.New("pedido já existe")
 		}
@@ -80,10 +84,10 @@ func TestPedidoUseCase_Run_MultiplePedidos(t *testing.T) {
 	for _, p := range pedidos {
 		id, err := useCase.Run(context.Background(), p.Cliente.CPF, p.Produtos)
 		if err != nil {
-			t.Fatalf("unexpected error for pedido %+v: %v", p, err)
+			t.Fatalf("unexpected error for pedido %+v: %v\n", p, err)
 		}
 		if id == nil {
-			t.Fatalf("expected pedido to be created for %+v", p)
+			t.Fatalf("expected pedido to be created for %+v\n", p)
 		}
 	}
 
