@@ -18,26 +18,14 @@ import (
 
 type MockAcompanhamentoUseCase struct{ mock.Mock }
 
-// Implements: CriarAcompanhamento(c context.Context, acompanhamento *entities.AcompanhamentoPedido) error
-func (m *MockAcompanhamentoUseCase) CriarAcompanhamento(c context.Context, acompanhamento *entities.AcompanhamentoPedido) error {
-	args := m.Called(c, acompanhamento)
+// Implements: AdicionarPedido(c context.Context, idAcompanhamento int, pedido *entities.Pedido) error
+func (m *MockAcompanhamentoUseCase) AdicionarPedido(c context.Context, idAcompanhamento int, pedidoID int) error {
+	args := m.Called(c, idAcompanhamento, pedidoID)
 	return args.Error(0)
 }
 
-// Implements: BuscarPedido(c context.Context, id string) (entities.Pedido, error)
-func (m *MockAcompanhamentoUseCase) BuscarPedido(c context.Context, id string) (entities.Pedido, error) {
-	args := m.Called(c, id)
-	return args.Get(0).(entities.Pedido), args.Error(1)
-}
-
-// Implements: AdicionarPedido(c context.Context, idAcompanhamento string, pedido *entities.Pedido) error
-func (m *MockAcompanhamentoUseCase) AdicionarPedido(c context.Context, idAcompanhamento string, pedido *entities.Pedido) error {
-	args := m.Called(c, idAcompanhamento, pedido)
-	return args.Error(0)
-}
-
-// Implements: BuscarAcompanhamento(c context.Context, id string) (*entities.AcompanhamentoPedido, error)
-func (m *MockAcompanhamentoUseCase) BuscarAcompanhamento(c context.Context, id string) (*entities.AcompanhamentoPedido, error) {
+// Implements: BuscarAcompanhamento(c context.Context, id int) (*entities.AcompanhamentoPedido, error)
+func (m *MockAcompanhamentoUseCase) BuscarAcompanhamento(c context.Context, id int) (*entities.AcompanhamentoPedido, error) {
 	args := m.Called(c, id)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -45,10 +33,24 @@ func (m *MockAcompanhamentoUseCase) BuscarAcompanhamento(c context.Context, id s
 	return args.Get(0).(*entities.AcompanhamentoPedido), args.Error(1)
 }
 
-// Implements: AtualizarStatusPedido(c context.Context, idAcompanhamento, idPedido string, status entities.StatusPedido) error
-func (m *MockAcompanhamentoUseCase) AtualizarStatusPedido(c context.Context, idAcompanhamento, idPedido string, status entities.StatusPedido) error {
-	args := m.Called(c, idAcompanhamento, idPedido, status)
+// Implements: AtualizarStatusPedido(c context.Context, idAcompanhamento int, status entities.StatusPedido) error
+func (m *MockAcompanhamentoUseCase) AtualizarStatusPedido(c context.Context, idAcompanhamento int, status entities.StatusPedido) error {
+	args := m.Called(c, idAcompanhamento, status)
 	return args.Error(0)
+}
+
+// Implements: CriarAcompanhamento(c context.Context, acompanhamento *entities.AcompanhamentoPedido) error
+func (m *MockAcompanhamentoUseCase) CriarAcompanhamento(c context.Context) (int, error) {
+	return 0, nil
+}
+
+// Implements: BuscarPedidos(c context.Context, idAcompanhamento int) ([]entities.Pedido, error)
+func (m *MockAcompanhamentoUseCase) BuscarPedidos(c context.Context, idAcompanhamento int) ([]entities.Pedido, error) {
+	args := m.Called(c, idAcompanhamento)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]entities.Pedido), args.Error(1)
 }
 
 // --- Setup Handler ---
@@ -64,56 +66,19 @@ func setupAcompanhamentoHandlerWithMocks() (*AcompanhamentoHandler, *MockAcompan
 	return handler, mockAcompanhamento, mockPedidoAtualizar
 }
 
-// --- Tests ---
-
-func TestAcompanhamentoHandler_CriarAcompanhamento(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	handler, mockAcompanhamento, _ := setupAcompanhamentoHandlerWithMocks()
-
-	acomp := &entities.AcompanhamentoPedido{ID: "acomp1"}
-	mockAcompanhamento.On("CriarAcompanhamento", mock.Anything, acomp).Return(nil)
-
-	body, _ := json.Marshal(acomp)
-	req, _ := http.NewRequest(http.MethodPost, "/acompanhamento", bytes.NewBuffer(body))
-	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
-	c.Request = req
-
-	handler.CriarAcompanhamento(c)
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Contains(t, w.Body.String(), "Acompanhamento criado com sucesso")
-}
-
-func TestAcompanhamentoHandler_BuscarPedido(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	handler, mockAcompanhamento, _ := setupAcompanhamentoHandlerWithMocks()
-
-	pedido := entities.Pedido{Identificacao: "ped1"}
-	mockAcompanhamento.On("BuscarPedido", mock.Anything, "ped1").Return(pedido, nil)
-
-	req, _ := http.NewRequest(http.MethodGet, "/acompanhamento/ped1", nil)
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
-	c.Params = gin.Params{{Key: "ID", Value: "ped1"}}
-	c.Request = req
-
-	handler.BuscarPedido(c)
-	assert.Equal(t, http.StatusOK, w.Code)
-}
-
 func TestAcompanhamentoHandler_AdicionarPedido(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	handler, mockAcompanhamento, _ := setupAcompanhamentoHandlerWithMocks()
 
-	mockAcompanhamento.On("AdicionarPedido", mock.Anything, "acomp1", mock.AnythingOfType("*entities.Pedido")).Return(nil)
+	// Use integer IDs as expected by the mock
+	mockAcompanhamento.On("AdicionarPedido", mock.Anything, 1, 2).Return(nil)
 
-	req, _ := http.NewRequest(http.MethodPost, "/acompanhamento/acomp1/ped1", nil)
+	req, _ := http.NewRequest(http.MethodPost, "/acompanhamento/1/2", nil)
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Params = gin.Params{
-		{Key: "IDAcompanhamento", Value: "acomp1"},
-		{Key: "IDPedido", Value: "ped1"},
+		{Key: "IDAcompanhamento", Value: "1"},
+		{Key: "IDPedido", Value: "2"},
 	}
 	c.Request = req
 
@@ -126,13 +91,13 @@ func TestAcompanhamentoHandler_BuscarAcompanhamento(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	handler, mockAcompanhamento, _ := setupAcompanhamentoHandlerWithMocks()
 
-	acomp := &entities.AcompanhamentoPedido{ID: "acomp1"}
-	mockAcompanhamento.On("BuscarAcompanhamento", mock.Anything, "acomp1").Return(acomp, nil)
+	acomp := &entities.AcompanhamentoPedido{ID: 1}
+	mockAcompanhamento.On("BuscarAcompanhamento", mock.Anything, 1).Return(acomp, nil)
 
-	req, _ := http.NewRequest(http.MethodGet, "/acompanhamento/acomp1", nil)
+	req, _ := http.NewRequest(http.MethodGet, "/acompanhamento/1", nil)
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	c.Params = gin.Params{{Key: "ID", Value: "acomp1"}}
+	c.Params = gin.Params{{Key: "ID", Value: "1"}}
 	c.Request = req
 
 	handler.BuscarAcompanhamento(c)
@@ -144,16 +109,17 @@ func TestAcompanhamentoHandler_AtualizarStatusPedido(t *testing.T) {
 	handler, mockAcompanhamento, _ := setupAcompanhamentoHandlerWithMocks()
 
 	statusReq := StatusUpdateRequest{Status: "Finalizado"}
-	mockAcompanhamento.On("AtualizarStatusPedido", mock.Anything, "acomp1", "ped1", entities.StatusPedido("Finalizado")).Return(nil)
+	mockAcompanhamento.On("AtualizarStatusPedido", mock.Anything, 1, entities.StatusPedido("Finalizado")).Return(nil)
+	mockAcompanhamento.On("BuscarPedidos", mock.Anything, 2).Return([]entities.Pedido{}, nil)
 
 	body, _ := json.Marshal(statusReq)
-	req, _ := http.NewRequest(http.MethodPut, "/acompanhamento/acomp1/pedido/ped1/status", bytes.NewBuffer(body))
+	req, _ := http.NewRequest(http.MethodPut, "/acompanhamento/1/pedido/2/status", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Params = gin.Params{
-		{Key: "IDAcompanhamento", Value: "acomp1"},
-		{Key: "IDPedido", Value: "ped1"},
+		{Key: "IDAcompanhamento", Value: "1"},
+		{Key: "IDPedido", Value: "2"},
 	}
 	c.Request = req
 

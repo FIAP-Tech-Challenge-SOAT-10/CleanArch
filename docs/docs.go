@@ -55,9 +55,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/acompanhamento/show": {
-            "get": {
-                "description": "Busca um acompanhamento",
+        "/acompanhamento/{IDAcompanhamento}/pedido/{IDPedido}/status": {
+            "put": {
+                "description": "Atualiza o status de um pedido no acompanhamento",
                 "consumes": [
                     "application/json"
                 ],
@@ -67,25 +67,47 @@ const docTemplate = `{
                 "tags": [
                     "acompanhamento"
                 ],
-                "summary": "Busca um acompanhamento",
+                "summary": "Atualiza o status de um pedido",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "ID do acompanhamento",
-                        "name": "ID",
+                        "name": "IDAcompanhamento",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID do pedido",
+                        "name": "IDPedido",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Novo status do pedido",
+                        "name": "status",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.StatusUpdateRequest"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/presenters.AcompanhamentoDTO"
+                            "$ref": "#/definitions/response.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Pedido ou acompanhamento não encontrado",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
@@ -150,9 +172,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/acompanhamento/{IDAcompanhamento}/{IDPedido}/{status}": {
-            "put": {
-                "description": "Atualiza o status de um pedido",
+        "/acompanhamento/{ID}": {
+            "get": {
+                "description": "Busca um acompanhamento pelo ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -162,63 +184,11 @@ const docTemplate = `{
                 "tags": [
                     "acompanhamento"
                 ],
-                "summary": "Atualiza o status de um pedido",
+                "summary": "Busca um acompanhamento",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "ID do acompanhamento",
-                        "name": "IDAcompanhamento",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "ID do pedido",
-                        "name": "IDPedido",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Novo status",
-                        "name": "status",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/acompanhamento/{ID}": {
-            "get": {
-                "description": "Busca um pedido",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "acompanhamento"
-                ],
-                "summary": "Busca um pedido",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "ID do pedido",
                         "name": "ID",
                         "in": "path",
                         "required": true
@@ -228,11 +198,70 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/entities.AcompanhamentoPedido"
+                            "$ref": "#/definitions/presenters.AcompanhamentoDTO"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Acompanhamento não encontrado",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/acompanhamento/{ID}/pedidos": {
+            "get": {
+                "description": "Busca os pedidos associados a um acompanhamento",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "acompanhamento"
+                ],
+                "summary": "Busca os pedidos de um acompanhamento",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID do acompanhamento",
+                        "name": "ID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entities.Pedido"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Acompanhamento não encontrado",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
@@ -593,46 +622,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/produto/editar": {
-            "post": {
-                "description": "Edita um produto",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "produto"
-                ],
-                "summary": "Edita um produto",
-                "parameters": [
-                    {
-                        "description": "Produto",
-                        "name": "cliente",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entities.Produto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/produto/{id}": {
             "get": {
                 "description": "Busca um produto",
@@ -648,8 +637,8 @@ const docTemplate = `{
                 "summary": "Busca um produto",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "id do produto",
+                        "type": "integer",
+                        "description": "ID do produto",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -669,7 +658,9 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/produto/{nome}": {
             "delete": {
                 "description": "Remove um produto",
                 "consumes": [
@@ -685,8 +676,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "id do produto",
-                        "name": "id",
+                        "description": "nome do produto",
+                        "name": "nome",
                         "in": "path",
                         "required": true
                     }
@@ -728,6 +719,44 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/entities.Produto"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Edita um produto existente pelo nome",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "produto"
+                ],
+                "summary": "Edita um produto",
+                "parameters": [
+                    {
+                        "description": "Produto",
+                        "name": "produto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entities.Produto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
                         }
                     },
                     "400": {
@@ -786,15 +815,18 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "id": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "pedidos": {
-                    "$ref": "#/definitions/entities.FilaPedidos"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Pedido"
+                    }
                 },
-                "tempoEstimado": {
-                    "$ref": "#/definitions/time.Duration"
+                "tempo_estimado": {
+                    "type": "string"
                 },
-                "ultimaAtualizacao": {
+                "ultima_atualizacao": {
                     "type": "string"
                 }
             }
@@ -828,17 +860,6 @@ const docTemplate = `{
                 }
             }
         },
-        "entities.FilaPedidos": {
-            "type": "object",
-            "properties": {
-                "pedidos": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.Pedido"
-                    }
-                }
-            }
-        },
         "entities.Pagamento": {
             "type": "object",
             "properties": {
@@ -846,7 +867,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "idPagamento": {
-                    "type": "string"
+                    "type": "integer"
+                },
+                "idPedido": {
+                    "type": "integer"
                 },
                 "status": {
                     "type": "string"
@@ -859,14 +883,11 @@ const docTemplate = `{
         "entities.Pedido": {
             "type": "object",
             "properties": {
-                "cliente": {
-                    "$ref": "#/definitions/entities.Cliente"
-                },
-                "identificacao": {
+                "cliente_cpf": {
                     "type": "string"
                 },
-                "personalizacao": {
-                    "type": "string"
+                "id": {
+                    "type": "integer"
                 },
                 "produtos": {
                     "type": "array",
@@ -877,38 +898,39 @@ const docTemplate = `{
                 "status": {
                     "$ref": "#/definitions/entities.StatusPedido"
                 },
-                "statusPagamento": {
+                "status_pagamento": {
                     "type": "string"
                 },
-                "timeStamp": {
-                    "type": "string",
-                    "format": "date-time"
+                "time_stamp": {
+                    "type": "string"
                 },
                 "total": {
                     "type": "number"
                 },
-                "ultimaAtualizacao": {
-                    "type": "string",
-                    "format": "date-time"
+                "ultima_atualizacao": {
+                    "type": "string"
                 }
             }
         },
         "entities.Produto": {
             "type": "object",
             "properties": {
-                "categoria": {
+                "categoriaProduto": {
                     "$ref": "#/definitions/entities.CatProduto"
                 },
-                "descricao": {
+                "descricaoProduto": {
                     "type": "string"
                 },
-                "identificacao": {
+                "id": {
+                    "type": "integer"
+                },
+                "nomeProduto": {
                     "type": "string"
                 },
-                "nome": {
-                    "type": "string"
+                "personalizacaoProduto": {
+                    "$ref": "#/definitions/sql.NullString"
                 },
-                "preco": {
+                "precoProduto": {
                     "type": "number"
                 }
             }
@@ -930,6 +952,15 @@ const docTemplate = `{
                 "Finalizado"
             ]
         },
+        "handler.StatusUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "example": "Em preparação"
+                }
+            }
+        },
         "presenters.AcompanhamentoDTO": {
             "type": "object",
             "properties": {
@@ -944,7 +975,7 @@ const docTemplate = `{
                 },
                 "tempoEstimado": {
                     "description": "in minutes",
-                    "type": "integer"
+                    "type": "string"
                 }
             }
         },
@@ -962,20 +993,52 @@ const docTemplate = `{
                 }
             }
         },
+        "presenters.ItemPedidoDTO": {
+            "type": "object",
+            "properties": {
+                "nomeProduto": {
+                    "type": "string"
+                },
+                "precoUnitario": {
+                    "type": "number"
+                },
+                "produtoId": {
+                    "type": "integer"
+                },
+                "quantidade": {
+                    "type": "integer"
+                },
+                "subtotal": {
+                    "type": "number"
+                }
+            }
+        },
         "presenters.PedidoDTO": {
             "type": "object",
             "properties": {
+                "cliente": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
                 "identificacao": {
                     "type": "string"
                 },
+                "itens": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/presenters.ItemPedidoDTO"
+                    }
+                },
                 "status": {
                     "$ref": "#/definitions/entities.StatusPedido"
                 },
                 "tempoEstimado": {
                     "$ref": "#/definitions/time.Duration"
+                },
+                "total": {
+                    "type": "number"
                 }
             }
         },
@@ -989,7 +1052,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "identificacao": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "nome": {
                     "type": "string"
@@ -1012,6 +1075,18 @@ const docTemplate = `{
             "properties": {
                 "message": {
                     "type": "string"
+                }
+            }
+        },
+        "sql.NullString": {
+            "type": "object",
+            "properties": {
+                "string": {
+                    "type": "string"
+                },
+                "valid": {
+                    "description": "Valid is true if String is not NULL",
+                    "type": "boolean"
                 }
             }
         },

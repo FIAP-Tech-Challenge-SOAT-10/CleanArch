@@ -28,13 +28,20 @@ type ClienteHandler struct {
 func (cc *ClienteHandler) CriarCliente(c *gin.Context) {
 	var cliente entities.Cliente
 
-	err := c.ShouldBind(&cliente)
+	if err := c.ShouldBindJSON(&cliente); err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Message: "Erro ao ler dados do cliente: " + err.Error()})
+		return
+	}
+
+	novoCliente, err := entities.ClienteNew(cliente.Nome, cliente.Email, cliente.CPF)
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 		return
 	}
 
-	err = cc.ClienteUseCase.CriarCliente(c, &cliente)
+	err = cc.ClienteUseCase.CriarCliente(c, novoCliente)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Message: err.Error()})
 		return
@@ -59,6 +66,7 @@ func (cc *ClienteHandler) BuscarCliente(c *gin.Context) {
 
 	CPF := c.Param("CPF")
 	cliente, err := cc.ClienteUseCase.BuscarCliente(c, CPF)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Message: err.Error()})
 		return

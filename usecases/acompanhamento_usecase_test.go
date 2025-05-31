@@ -45,17 +45,17 @@ func TestCriarAcompanhamento_Completo(t *testing.T) {
 	ctx := context.Background()
 
 	acomp := &entities.AcompanhamentoPedido{
-		ID:                "acomp-1",
-		Pedidos:           entities.NewFilaPedidos(),
-		TempoEstimado:     20 * time.Minute,
-		UltimaAtualizacao: time.Now().Format("2006-01-02 15:04:05"),
+		ID:                1,
+		Pedidos:           []entities.Pedido{},
+		TempoEstimado:     "00:15:00", // 15 minutes
+		UltimaAtualizacao: time.Now(),
 	}
 
 	mockUC.On("CriarAcompanhamento", ctx, acomp).Return(nil)
 
 	err := mockUC.CriarAcompanhamento(ctx, acomp)
 	assert.NoError(t, err)
-	assert.Equal(t, "acomp-1", acomp.ID)
-	assert.Equal(t, 20*time.Minute, acomp.TempoEstimado)
+	assert.Equal(t, 1, acomp.ID)                     // Fix: match the type and value
+	assert.Equal(t, "00:15:00", acomp.TempoEstimado) // Fix: match the type and value
 	assert.NotEmpty(t, acomp.UltimaAtualizacao)
 }

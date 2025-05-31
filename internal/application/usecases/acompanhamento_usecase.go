@@ -18,26 +18,25 @@ func NewAcompanhamentoUseCase(acompanhamentoRepo repository.AcompanhamentoReposi
 	}
 }
 
-func (uc *acompanhamentoUseCase) CriarAcompanhamento(c context.Context, acompanhamento *entities.AcompanhamentoPedido) error {
-	return uc.acompanhamentoRepo.CriarAcompanhamento(c, acompanhamento)
+func (uc *acompanhamentoUseCase) CriarAcompanhamento(c context.Context) (int, error) {
+	return uc.acompanhamentoRepo.CriarAcompanhamento(c)
 }
 
-func (uc *acompanhamentoUseCase) BuscarPedido(c context.Context, ID string) (entities.Pedido, error) {
-	return uc.acompanhamentoRepo.BuscarPedidos(c, ID)
+func (uc *acompanhamentoUseCase) AdicionarPedido(c context.Context, acompanhamentoID int, pedidoID int) error {
+	return uc.acompanhamentoRepo.AdicionarPedido(c, acompanhamentoID, pedidoID)
 }
 
-func (uc *acompanhamentoUseCase) AdicionarPedido(c context.Context, acompanhamentoID string, pedido *entities.Pedido) error {
-	acompanhamento := &entities.AcompanhamentoPedido{ID: acompanhamentoID}
-	return uc.acompanhamentoRepo.AdicionarPedido(c, acompanhamento, pedido)
+func (uc *acompanhamentoUseCase) AtualizarStatusPedido(c context.Context, identificacao int, novoStatus entities.StatusPedido) error {
+	fmt.Printf("UseCase: Atualizando pedido %d para status %s\n", identificacao, novoStatus)
+
+	return uc.acompanhamentoRepo.AtualizarStatusPedido(c, identificacao, novoStatus)
 }
 
-func (uc *acompanhamentoUseCase) BuscarAcompanhamento(c context.Context, ID string) (*entities.AcompanhamentoPedido, error) {
-	return uc.acompanhamentoRepo.BuscarAcompanhamento(c, ID)
+// Implementa o método BuscarAcompanhamento para satisfazer a interface usecase.AcompanhamentoUseCase
+func (uc *acompanhamentoUseCase) BuscarAcompanhamento(c context.Context, acompanhamentoID int) (*entities.AcompanhamentoPedido, error) {
+	return uc.acompanhamentoRepo.BuscarAcompanhamento(c, acompanhamentoID)
 }
 
-func (uc *acompanhamentoUseCase) AtualizarStatusPedido(c context.Context, acompanhamentoID string, identificacao string, novoStatus entities.StatusPedido) error {
-	fmt.Printf("UseCase: Atualizando pedido %s no acompanhamento %s para status %s\n",
-		identificacao, acompanhamentoID, novoStatus)
-
-	return uc.acompanhamentoRepo.AtualizarStatusPedido(c, acompanhamentoID, identificacao, novoStatus)
+func (uc *acompanhamentoUseCase) BuscarPedidos(c context.Context, acompanhamentoID int) ([]entities.Pedido, error) {
+	return uc.acompanhamentoRepo.BuscarPedidos(c, acompanhamentoID)
 }

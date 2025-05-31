@@ -1,12 +1,15 @@
 package handler
 
 import (
+	"fmt"
 	_ "lanchonete/docs"
 	"lanchonete/internal/application/presenters"
 	"lanchonete/internal/domain/entities"
 	response "lanchonete/internal/interfaces/http/responses"
 	"lanchonete/usecases"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,11 +30,12 @@ func NewProdutoHandler(produtoIncluirUseCase usecases.ProdutoIncluirUseCase,
 	produtoRemoverUseCase usecases.ProdutoRemoverUseCase,
 	produtoListarPorCategoriaUseCase usecases.ProdutoListarPorCategoriaUseCase) *ProdutoHandler {
 	return &ProdutoHandler{
-		ProdutoIncluirUseCase:     produtoIncluirUseCase,
-		ProdutoBuscarPorIdUseCase: produtoBuscarPorIdUseCase,
-		ProdutoListarTodosUseCase: produtoListarTodosUseCase,
-		ProdutoEditarUseCase:      produtoEditarUseCase,
-		ProdutoRemoverUseCase:     produtoRemoverUseCase,
+		ProdutoIncluirUseCase:            produtoIncluirUseCase,
+		ProdutoBuscarPorIdUseCase:        produtoBuscarPorIdUseCase,
+		ProdutoEditarUseCase:             produtoEditarUseCase,
+		ProdutoListarTodosUseCase:        produtoListarTodosUseCase,
+		ProdutoRemoverUseCase:            produtoRemoverUseCase,
+		ProdutoListarPorCategoriaUseCase: produtoListarPorCategoriaUseCase,
 	}
 }
 
@@ -46,15 +50,18 @@ func NewProdutoHandler(produtoIncluirUseCase usecases.ProdutoIncluirUseCase,
 // @Success 200 {object} response.SuccessResponse
 // @Failure 400 {object} response.ErrorResponse
 func (ph *ProdutoHandler) ProdutoIncluir(c *gin.Context) {
+
 	var produto entities.Produto
 
-	err := c.ShouldBind(&produto)
+	err := c.ShouldBindJSON(&produto)
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 		return
 	}
 
-	prd, err := ph.ProdutoIncluirUseCase.Run(c, produto.Identificacao, produto.Nome, string(produto.Categoria), produto.Descricao, produto.Preco)
+	prd, err := ph.ProdutoIncluirUseCase.Run(c, produto.Nome, string(produto.Categoria), produto.Descricao, produto.Preco)
+	fmt.Println("Entrando no if erro Handler")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Message: err.Error()})
 		return
@@ -72,15 +79,16 @@ func (ph *ProdutoHandler) ProdutoIncluir(c *gin.Context) {
 // @Router /produto/{id} [get]
 // @Accept  json
 // @Produce  json
-// @Param id path string true "id do produto"
+// @Param id path int true "ID do produto"
 // @Success 200 {object} presenters.ProdutoDTO
 // @Failure 400 {object} response.ErrorResponse
 func (ph *ProdutoHandler) ProdutoBuscarPorId(c *gin.Context) {
 	id := c.Param("id")
 
-	prd, err := ph.ProdutoBuscarPorIdUseCase.Run(c, id)
+	idnt, _ := strconv.Atoi(id)
+	prd, err := ph.ProdutoBuscarPorIdUseCase.Run(c, idnt)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Message: err.Error()})
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Message: "ID inválido"})
 		return
 	}
 
@@ -110,29 +118,33 @@ func (ph *ProdutoHandler) ProdutoListarTodos(c *gin.Context) {
 
 // EditarProduto godoc
 // @Summary Edita um produto
-// @Description Edita um produto
+// @Description Edita um produto existente pelo nome
 // @Tags produto
-// @Router /produto/editar [post]
 // @Accept  json
 // @Produce  json
-// @Param cliente body entities.Produto true "Produto"
+// @Param produto body entities.Produto true "Produto"
 // @Success 200 {object} response.SuccessResponse
 // @Failure 400 {object} response.ErrorResponse
+// @Router /produtos [put]
 func (ph *ProdutoHandler) ProdutoEditar(c *gin.Context) {
 	var produto entities.Produto
 
-	err := c.ShouldBind(&produto)
+	err := c.ShouldBindJSON(&produto)
+
 	if err != nil {
+		fmt.Println("Entrando no primeiro erro")
 		c.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 		return
 	}
 
-	prd, err := ph.ProdutoEditarUseCase.Run(c, produto.Identificacao, produto.Nome, string(produto.Categoria), produto.Descricao, produto.Preco)
+	prd, err := ph.ProdutoEditarUseCase.Run(c, produto.ID, produto.Nome, string(produto.Categoria), produto.Descricao, produto.Preco)
 	if err != nil {
+		fmt.Println("Entrando no segundo erro")
 		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Message: err.Error()})
 		return
 	}
 
+	fmt.Println("Produto editado com sucesso:", prd.Nome, prd.Descricao, prd.Preco, prd.Categoria)
 	c.JSON(http.StatusOK, response.SuccessResponse{
 		Message: "Produto editado com sucesso: " + prd.Nome,
 	})
@@ -142,17 +154,24 @@ func (ph *ProdutoHandler) ProdutoEditar(c *gin.Context) {
 // @Summary Remove um produto
 // @Description Remove um produto
 // @Tags produto
-// @Router /produto/{id} [DELETE]
+// @Router /produto/{nome} [DELETE]
 // @Accept  json
 // @Produce  json
-// @Param id path string true "id do produto"
+// @Param nome path string true "nome do produto"
 // @Success 200 {object} response.SuccessResponse
 // @Failure 400 {object} response.ErrorResponse
 func (ph *ProdutoHandler) ProdutoRemover(c *gin.Context) {
 	id := c.Param("id")
 
-	err := ph.ProdutoRemoverUseCase.Run(c, id)
+	idnt, _ := strconv.Atoi(id)
+	err := ph.ProdutoRemoverUseCase.Run(c, idnt)
 	if err != nil {
+		if strings.Contains(err.Error(), "produto não encontrado") {
+			c.JSON(http.StatusNotFound, response.ErrorResponse{Message: err.Error()})
+			return
+		}
+
+		// Outros erros (erro no banco, etc)
 		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Message: err.Error()})
 		return
 	}

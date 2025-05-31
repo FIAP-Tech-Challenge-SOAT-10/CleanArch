@@ -1,27 +1,24 @@
 package route
 
 import (
+	"database/sql"
 	"lanchonete/bootstrap"
-	"lanchonete/infra/database/mongo"
-	factory "lanchonete/internal/application/factories"
-	"lanchonete/internal/infrastructure/repository"
+	repo "lanchonete/infra/database/repositories"
 	handler "lanchonete/internal/interfaces/http/handlers"
+	"lanchonete/usecases"
 
 	"github.com/gin-gonic/gin"
 )
 
 // NovoPedidoRouter cria um novo roteador para pedidos
-func NovoPedidoRouter(env *bootstrap.Env, db mongo.Database, router *gin.RouterGroup) {
-	// Criar fábricas
-	repositorioFactory := repository.NovoRepositorioFactory(db)
-	useCaseFactory := factory.NovoUseCaseFactory(repositorioFactory)
+func NovoPedidoRouter(env *bootstrap.Env, db *sql.DB, router *gin.RouterGroup) {
 
 	// Criar casos de uso
-	pedidoIncluirUseCase := useCaseFactory.CriarPedidoIncluirUseCase()
-	pedidoBuscarPorIdUseCase := useCaseFactory.CriarPedidoBuscarPorIdUseCase()
-	pedidoAtualizarStatusUseCase := useCaseFactory.CriarPedidoAtualizarStatusUseCase()
-	produtoBuscarPorIdUseCase := useCaseFactory.CriarProdutoBuscarPorIdUseCase()
-	pedidoListarTodosUseCase := useCaseFactory.CriarPedidoListarTodosUseCase()
+	pedidoIncluirUseCase := usecases.NewPedidoIncluirUseCase(repo.NewPedidoMysqlRepository(db))
+	pedidoBuscarPorIdUseCase := usecases.NewPedidoBuscarPorIdUseCase(repo.NewPedidoMysqlRepository(db))
+	pedidoAtualizarStatusUseCase := usecases.NewPedidoAtualizarStatusUseCase(repo.NewPedidoMysqlRepository(db))
+	produtoBuscarPorIdUseCase := usecases.NewProdutoBuscaPorIdUseCase(repo.NewProdutoMysqlRepository(db))
+	pedidoListarTodosUseCase := usecases.NewPedidoListarTodosUseCase(repo.NewPedidoMysqlRepository(db))
 
 	// Criar handler
 	puc := &handler.PedidoHandler{
@@ -36,5 +33,5 @@ func NovoPedidoRouter(env *bootstrap.Env, db mongo.Database, router *gin.RouterG
 	router.POST("/pedidos", puc.CriarPedido)
 	router.GET("/pedidos/:nroPedido", puc.BuscarPedido)
 	router.PUT("/pedidos/:nroPedido/status/:status", puc.AtualizarStatusPedido)
-	router.POST("/pedidos/listartodos", puc.ListarTodosOsPedidos)
+	router.GET("/pedidos/listartodos", puc.ListarTodosOsPedidos)
 }

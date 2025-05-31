@@ -7,7 +7,7 @@ import (
 )
 
 type ProdutoRemoverUseCase interface {
-	Run(ctx context.Context, identificacao string) error
+	Run(ctx context.Context, id int) error
 }
 
 type produtoRemoverUseCase struct {
@@ -20,13 +20,13 @@ func NewProdutoRemoverUseCase(produtoGateway repository.ProdutoRepository) Produ
 	}
 }
 
-func (pruc *produtoRemoverUseCase) Run(c context.Context, identificacao string) error {
-	_, err := pruc.produtoGateway.BuscarProdutoPorId(c, identificacao)
+func (pruc *produtoRemoverUseCase) Run(c context.Context, id int) error {
+	_, err := pruc.produtoGateway.BuscarProdutoPorId(c, id)
 	if err != nil {
 		return fmt.Errorf("produto não existe no banco de dados: %w", err)
 	}
 
-	err = pruc.produtoGateway.RemoverProduto(c, identificacao)
+	err = pruc.produtoGateway.RemoverProduto(c, id)
 	if err != nil {
 		return fmt.Errorf("não foi possível remover o produto: %w", err)
 	}

@@ -7,7 +7,7 @@ import (
 )
 
 type PedidoIncluirUseCase interface {
-	Run(ctx context.Context, cliente entities.Cliente, produtos []entities.Produto, personalizacao string) (*entities.Pedido, error)
+	Run(ctx context.Context, clienteCPF string, produtos []entities.Produto) (*entities.Pedido, error)
 }
 
 type pedidoIncluirUseCase struct {
@@ -20,8 +20,8 @@ func NewPedidoIncluirUseCase(pedidoRepository repository.PedidoRepository) Pedid
 	}
 }
 
-func (pduc *pedidoIncluirUseCase) Run(c context.Context, cliente entities.Cliente, produtos []entities.Produto, personalizacao string) (*entities.Pedido, error) {
-	pedido, err := entities.PedidoNew(cliente, produtos, personalizacao)
+func (pduc *pedidoIncluirUseCase) Run(c context.Context, clienteCPF string, produtos []entities.Produto) (*entities.Pedido, error) {
+	pedido, err := entities.PedidoNew(clienteCPF, produtos) // Aqui!
 	if err != nil {
 		return nil, err
 	}

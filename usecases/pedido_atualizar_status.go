@@ -7,7 +7,7 @@ import (
 )
 
 type PedidoAtualizarStatusUseCase interface {
-	Run(ctx context.Context, identificacao string, status string) error
+	Run(ctx context.Context, pedidoID int, novo_status string) error
 }
 
 type pedidoAtualizarStatusUseCase struct {
@@ -20,18 +20,20 @@ func NewPedidoAtualizarStatusUseCase(pedidoGateway repository.PedidoRepository) 
 	}
 }
 
-func (pduc *pedidoAtualizarStatusUseCase) Run(c context.Context, identificacao string, status string) error {
+func (pduc *pedidoAtualizarStatusUseCase) Run(c context.Context, pedidoID int, status string) error {
 
-	pedido, err := pduc.pedidoGateway.BuscarPedido(c, identificacao)
+	pedido, err := pduc.pedidoGateway.BuscarPedido(c, pedidoID)
 	if err != nil {
 		return err
 	}
 
-	timeStamp, err := pedido.UpdateStatus(entities.StatusPedido(status))
+	err = pedido.UpdateStatus(entities.StatusPedido(status))
 	if err != nil {
 		return err
 	}
-	err = pduc.pedidoGateway.AtualizarStatusPedido(c, identificacao, status, timeStamp)
+
+	err = pduc.pedidoGateway.AtualizarStatusPedido(c, pedidoID, status, pedido.UltimaAtualizacao)
+
 	if err != nil {
 		return err
 	}

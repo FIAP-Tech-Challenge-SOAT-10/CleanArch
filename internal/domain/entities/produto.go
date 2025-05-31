@@ -1,7 +1,9 @@
 package entities
 
 import (
+	"database/sql"
 	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -15,15 +17,17 @@ const (
 )
 
 type Produto struct {
-	Identificacao string
-	Nome          string
-	Categoria     CatProduto
-	Descricao     string
-	Preco         float32
+	ID             int            `json:"id,omitempty"`
+	Nome           string         `json:"nomeProduto"`
+	Categoria      CatProduto     `json:"categoriaProduto"`
+	Descricao      string         `json:"descricaoProduto"`
+	Personalizacao sql.NullString `json:"personalizacaoProduto,omitempty"`
+	Preco          float32        `json:"precoProduto"`
 }
 
-func ProdutoNew(identificacao string, nome string, categoria string, descricao string, preco float32) (*Produto, error) {
-	if strings.TrimSpace(identificacao) == "" || strings.TrimSpace(nome) == "" || preco <= 0 || strings.TrimSpace(categoria) == "" {
+func ProdutoNew(nome string, categoria string, descricao string, preco float32) (*Produto, error) {
+	fmt.Println("Nome:", nome, "\nCategoria: ", categoria, "\nDescrição:", descricao, "\nPreço:", preco)
+	if strings.TrimSpace(nome) == "" || preco <= 0 || strings.TrimSpace(categoria) == "" {
 		return nil, errors.New("todos os campos são obrigatórios e o preço maior que zero")
 	}
 
@@ -37,10 +41,9 @@ func ProdutoNew(identificacao string, nome string, categoria string, descricao s
 	}
 
 	return &Produto{
-		Identificacao: identificacao,
-		Nome:          nome,
-		Categoria:     cat_prod,
-		Descricao:     descricao,
-		Preco:         preco,
+		Nome:      nome,
+		Categoria: cat_prod,
+		Descricao: descricao,
+		Preco:     preco,
 	}, nil
 }

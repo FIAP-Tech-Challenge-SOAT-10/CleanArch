@@ -1,12 +1,12 @@
 package route
 
 import (
+	"database/sql"
 	"lanchonete/bootstrap"
-	"lanchonete/infra/database/mongo"
-	factory "lanchonete/internal/application/factories"
+	repo "lanchonete/infra/database/repositories"
 	appusecases "lanchonete/internal/application/usecases"
-	"lanchonete/internal/infrastructure/repository"
 	handler "lanchonete/internal/interfaces/http/handlers"
+	"lanchonete/usecases"
 
 	"fmt"
 
@@ -14,14 +14,11 @@ import (
 )
 
 // NewAcompanhamentoRouter creates and configures all acompanhamento-related routes
-func NewAcompanhamentoRouter(env *bootstrap.Env, db mongo.Database, router *gin.RouterGroup) {
-	// Criar fábricas
-	repositorioFactory := repository.NovoRepositorioFactory(db)
-	useCaseFactory := factory.NovoUseCaseFactory(repositorioFactory)
+func NewAcompanhamentoRouter(env *bootstrap.Env, db *sql.DB, router *gin.RouterGroup) {
 
 	// Criar casos de uso
-	acompanhamentoUseCase := appusecases.NewAcompanhamentoUseCase(repositorioFactory.CriarAcompanhamentoRepository())
-	pedidoAtualizarStatusUseCase := useCaseFactory.CriarPedidoAtualizarStatusUseCase()
+	acompanhamentoUseCase := appusecases.NewAcompanhamentoUseCase(repo.NewAcompanhamentoMySQLRepository(db))
+	pedidoAtualizarStatusUseCase := usecases.NewPedidoAtualizarStatusUseCase(repo.NewPedidoMysqlRepository(db))
 
 	auc := &handler.AcompanhamentoHandler{
 		AcompanhamentoUseCase:        acompanhamentoUseCase,
@@ -31,8 +28,8 @@ func NewAcompanhamentoRouter(env *bootstrap.Env, db mongo.Database, router *gin.
 	fmt.Printf("Registrando rotas do acompanhamento\n")
 
 	router.POST("/acompanhamento", auc.CriarAcompanhamento)
-	router.GET("/acompanhamento/show", auc.BuscarAcompanhamento)
-	router.GET("/acompanhamento/:ID", auc.BuscarPedido)
+	router.GET("/acompanhamento/:ID", auc.BuscarAcompanhamento)
 	router.POST("/acompanhamento/:IDAcompanhamento/:IDPedido", auc.AdicionarPedido)
 	router.PUT("acompanhamento/:IDAcompanhamento/:IDPedido/:status", auc.AtualizarStatusPedido)
+	router.GET("/acompanhamento/:ID/pedidos", auc.BuscarPedidos)
 }

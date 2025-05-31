@@ -2,14 +2,15 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"lanchonete/bootstrap"
+	_ "lanchonete/docs"
 	"lanchonete/internal/interfaces/http/server"
-	_"lanchonete/docs"
 )
 
 // @title Lanchonete API - Tech Challenge 2
@@ -18,8 +19,11 @@ import (
 
 // @host localhost:8080
 // @BasePath /
+//
 //go:generate go run github.com/swaggo/swag/cmd/swag@latest init
 func main() {
+	fmt.Println("🔧 Iniciando aplicação...")
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -30,8 +34,7 @@ func main() {
 	}
 
 	// Create and configure HTTP server
-	srv := server.NewServer(app.Env, app.DB)
-	srv.SetupRoutes()
+	srv := server.NewServer(app)
 
 	// Start server in a goroutine
 	go func() {

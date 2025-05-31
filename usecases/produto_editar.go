@@ -8,7 +8,7 @@ import (
 )
 
 type ProdutoEditarUseCase interface {
-	Run(ctx context.Context, identificacao, nome, categoria, descricao string, preco float32) (*entities.Produto, error)
+	Run(ctx context.Context, id int, nome, categoria, descricao string, preco float32) (*entities.Produto, error)
 }
 
 type produtoEditarUseCase struct {
@@ -21,9 +21,9 @@ func NewProdutoEditarUseCase(produtoGateway repository.ProdutoRepository) Produt
 	}
 }
 
-func (puc *produtoEditarUseCase) Run(c context.Context, identificacao string, nome string, categoria string, descricao string, preco float32) (*entities.Produto, error) {
+func (puc *produtoEditarUseCase) Run(c context.Context, id int, nome string, categoria string, descricao string, preco float32) (*entities.Produto, error) {
 
-	produto, err := puc.produtoGateway.BuscarProdutoPorId(c, identificacao)
+	produto, err := puc.produtoGateway.BuscarProdutoPorId(c, id)
 
 	if err != nil {
 		return nil, fmt.Errorf("produto não cadastrado, crie o produto primeiro: %w", err)
@@ -45,15 +45,16 @@ func (puc *produtoEditarUseCase) Run(c context.Context, identificacao string, no
 		preco = produto.Preco
 	}
 
-	produtoEditado, err := entities.ProdutoNew(identificacao, nome, categoria, descricao, preco)
+	produtoEditado, err := entities.ProdutoNew(nome, categoria, descricao, preco)
 	if err != nil {
 		return nil, fmt.Errorf("atualização de produto inválida: %w", err)
 	}
 
+	produtoEditado.Nome = nome
+
 	err = puc.produtoGateway.EditarProduto(c, produtoEditado)
 	if err != nil {
 		return nil, fmt.Errorf("não foi possível atualizar o produto: %w", err)
-
 	}
 
 	return produto, nil

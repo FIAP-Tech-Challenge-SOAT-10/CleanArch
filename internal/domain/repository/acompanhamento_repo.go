@@ -6,9 +6,9 @@ import (
 )
 
 type AcompanhamentoRepository interface {
-	CriarAcompanhamento(c context.Context, acompanhamento *entities.AcompanhamentoPedido) error
-	BuscarPedidos(c context.Context, ID string) (entities.Pedido, error)
-	AdicionarPedido(c context.Context, acompanhamento *entities.AcompanhamentoPedido, pedido *entities.Pedido) error
-	BuscarAcompanhamento(c context.Context, ID string) (*entities.AcompanhamentoPedido, error)
-	AtualizarStatusPedido(c context.Context, acompanhamentoID string, identificacao string, novoStatus entities.StatusPedido) error
+	CriarAcompanhamento(c context.Context) (int, error)
+	AdicionarPedido(c context.Context, idAcompanhamento int, idPedido int) error
+	AtualizarStatusPedido(c context.Context, idPedido int, novoStatus entities.StatusPedido) error
+	BuscarAcompanhamento(c context.Context, idAcompanhamento int) (*entities.AcompanhamentoPedido, error)
+	BuscarPedidos(ctx context.Context, idPedido int) ([]entities.Pedido, error)
 }

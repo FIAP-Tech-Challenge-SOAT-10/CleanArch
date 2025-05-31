@@ -3,12 +3,12 @@ package handler
 import (
 	"fmt"
 	_ "lanchonete/docs"
-	"lanchonete/internal/domain/entities"
-	"lanchonete/internal/domain/usecase"
-	"lanchonete/usecases"
-	response "lanchonete/internal/interfaces/http/responses"
 	"lanchonete/internal/application/presenters"
+	"lanchonete/internal/domain/usecase"
+	response "lanchonete/internal/interfaces/http/responses"
+	"lanchonete/usecases"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,48 +35,15 @@ func NewAcompanhamentoHandler(auc usecase.AcompanhamentoUseCase, p usecases.Pedi
 // @Param acompanhamento body entities.AcompanhamentoPedido true "Acompanhamento"
 // @Success 200 {object} response.SuccessResponse
 // @Failure 400 {object} response.ErrorResponse
-func (ah *AcompanhamentoHandler) CriarAcompanhamento(a *gin.Context) {
-	fmt.Print(a)
-	var acompanhamento entities.AcompanhamentoPedido
-
-	err := a.ShouldBind(&acompanhamento)
+func (ah *AcompanhamentoHandler) CriarAcompanhamento(c *gin.Context) {
+	id, err := ah.AcompanhamentoUseCase.CriarAcompanhamento(c)
 	if err != nil {
-		a.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
+		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Message: err.Error()})
 		return
 	}
-
-	err = ah.AcompanhamentoUseCase.CriarAcompanhamento(a, &acompanhamento)
-	if err != nil {
-		a.JSON(http.StatusInternalServerError, response.ErrorResponse{Message: err.Error()})
-		return
-	}
-
-	a.JSON(http.StatusOK, response.SuccessResponse{
-		Message: "Acompanhamento criado com sucesso",
+	c.JSON(http.StatusOK, response.SuccessResponse{
+		Message: fmt.Sprintf("Acompanhamento criado com ID: %d", id),
 	})
-}
-
-// BuscarPedido godoc
-// @Summary Busca um pedido
-// @Description Busca um pedido
-// @Tags acompanhamento
-// @Router /acompanhamento/{ID} [get]
-// @Accept  json
-// @Produce  json
-// @Param ID path string true "ID do pedido"
-// @Success 200 {object} presenters.PedidoDTO
-// @Failure 400 {object} response.ErrorResponse
-func (ah *AcompanhamentoHandler) BuscarPedido(p *gin.Context) {
-	ID := p.Param("ID")
-	fmt.Print(p.Params)
-	pedido, err := ah.AcompanhamentoUseCase.BuscarPedido(p, ID)
-	if err != nil {
-		p.JSON(http.StatusInternalServerError, response.ErrorResponse{Message: err.Error()})
-		return
-	}
-
-	pedidoDTO := presenters.NewPedidoDTO(&pedido)
-	p.JSON(http.StatusOK, pedidoDTO)
 }
 
 // AdicionarPedido godoc
@@ -92,20 +59,28 @@ func (ah *AcompanhamentoHandler) BuscarPedido(p *gin.Context) {
 // @Failure 400 {object} response.ErrorResponse
 // @Failure 404 {object} response.ErrorResponse "Pedido ou acompanhamento não encontrado"
 // @Failure 500 {object} response.ErrorResponse "Erro interno"
-func (ah *AcompanhamentoHandler) AdicionarPedido(a *gin.Context) {
-	idAcompanhamento := a.Param("IDAcompanhamento")
-	idPedido := a.Param("IDPedido")
+func (ah *AcompanhamentoHandler) AdicionarPedido(c *gin.Context) {
+	idAcompanhamento := c.Param("IDAcompanhamento")
+	idPedido := c.Param("IDPedido")
 
-	pedido := &entities.Pedido{
-		Identificacao: idPedido,
-	}
-	err := ah.AcompanhamentoUseCase.AdicionarPedido(a, idAcompanhamento, pedido)
+	idAcomp, err := strconv.Atoi(idAcompanhamento)
 	if err != nil {
-		a.JSON(http.StatusInternalServerError, response.ErrorResponse{Message: err.Error()})
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Message: "IDAcompanhamento inválido"})
+		return
+	}
+	idPed, err := strconv.Atoi(idPedido)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Message: "IDPedido inválido"})
 		return
 	}
 
-	a.JSON(http.StatusOK, response.SuccessResponse{
+	err = ah.AcompanhamentoUseCase.AdicionarPedido(c, idAcomp, idPed)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, response.SuccessResponse{
 		Message: "Pedido adicionado ao acompanhamento com sucesso",
 	})
 }
@@ -122,15 +97,21 @@ func (ah *AcompanhamentoHandler) AdicionarPedido(a *gin.Context) {
 // @Failure 400 {object} response.ErrorResponse
 // @Failure 404 {object} response.ErrorResponse "Acompanhamento não encontrado"
 func (ah *AcompanhamentoHandler) BuscarAcompanhamento(c *gin.Context) {
-	ID := c.Param("ID")
-	acompanhamento, err := ah.AcompanhamentoUseCase.BuscarAcompanhamento(c, ID)
+	idStr := c.Param("ID")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Message: "ID inválido"})
+		return
+	}
+
+	acompanhamento, err := ah.AcompanhamentoUseCase.BuscarAcompanhamento(c, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Message: err.Error()})
 		return
 	}
 
-	acompanhamentoDTO := presenters.NewAcompanhamentoDTO(acompanhamento)
-	c.JSON(http.StatusOK, acompanhamentoDTO)
+	dto := presenters.NewAcompanhamentoDTO(acompanhamento)
+	c.JSON(http.StatusOK, dto)
 }
 
 // AtualizarStatusPedido godoc
@@ -146,25 +127,57 @@ func (ah *AcompanhamentoHandler) BuscarAcompanhamento(c *gin.Context) {
 // @Success 200 {object} response.SuccessResponse
 // @Failure 400 {object} response.ErrorResponse
 // @Failure 404 {object} response.ErrorResponse "Pedido ou acompanhamento não encontrado"
-func (ah *AcompanhamentoHandler) AtualizarStatusPedido(a *gin.Context) {
-	idAcompanhamento := a.Param("IDAcompanhamento")
-	idPedido := a.Param("IDPedido")
+func (ah *AcompanhamentoHandler) AtualizarStatusPedido(c *gin.Context) {
+	idPedidoStr := c.Param("IDPedido")
+	fmt.Println("IDPedido: ", idPedidoStr)
 
-	var statusUpdate StatusUpdateRequest
-	if err := a.ShouldBindJSON(&statusUpdate); err != nil {
-		a.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
-		return
-	}
-
-	err := ah.AcompanhamentoUseCase.AtualizarStatusPedido(a, idAcompanhamento, idPedido, entities.StatusPedido(statusUpdate.Status))
+	idPedido, err := strconv.Atoi(idPedidoStr)
 	if err != nil {
-		a.JSON(http.StatusInternalServerError, response.ErrorResponse{Message: err.Error()})
+		c.JSON(http.StatusBadRequest, response.ErrorResponse{Message: "IDPedido inválido"})
 		return
 	}
 
-	a.JSON(http.StatusOK, response.SuccessResponse{
+	peds, err := ah.AcompanhamentoUseCase.BuscarPedidos(c, idPedido)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	fmt.Println("Pedidos encontrados: ", peds)
+
+	c.JSON(http.StatusOK, response.SuccessResponse{
 		Message: "Status do pedido atualizado com sucesso",
 	})
+}
+
+// BuscarPedidos godoc
+// @Summary Busca os pedidos de um acompanhamento
+// @Description Busca os pedidos associados a um acompanhamento
+// @Tags acompanhamento
+// @Router /acompanhamento/{ID}/pedidos [get]
+// @Accept json
+// @Produce json
+// @Param ID path string true "ID do acompanhamento"
+// @Success 200 {object} []entities.Pedido
+// @Failure 400 {object} response.ErrorResponse
+// @Failure 404 {object} response.ErrorResponse "Acompanhamento não encontrado"
+// @Failure 500 {object} response.ErrorResponse "Erro interno"
+func (h *AcompanhamentoHandler) BuscarPedidos(ctx *gin.Context) {
+	fmt.Println("Handler: ", ctx.Param("ID"))
+	idAcompanhamentoStr := ctx.Param("ID")
+	idAcompanhamento, err := strconv.Atoi(idAcompanhamentoStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, response.ErrorResponse{Message: "ID inválido"})
+		return
+	}
+
+	pedidos, err := h.AcompanhamentoUseCase.BuscarPedidos(ctx, idAcompanhamento)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, pedidos)
 }
 
 type StatusUpdateRequest struct {

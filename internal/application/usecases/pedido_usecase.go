@@ -5,6 +5,7 @@ import (
 	"lanchonete/internal/domain/entities"
 	"lanchonete/internal/domain/repository"
 	"lanchonete/usecases"
+	"time"
 )
 
 type pedidoUseCase struct {
@@ -21,10 +22,10 @@ func (puc *pedidoUseCase) CriarPedido(c context.Context, pedido *entities.Pedido
 	return puc.pedidoRepository.CriarPedido(c, pedido)
 }
 
-func (puc *pedidoUseCase) BuscarPedido(c context.Context, identificacao string) (*entities.Pedido, error) {
+func (puc *pedidoUseCase) BuscarPedido(c context.Context, identificacao int) (*entities.Pedido, error) {
 	return puc.pedidoRepository.BuscarPedido(c, identificacao)
 }
 
-func (puc *pedidoUseCase) AtualizarStatusPedido(c context.Context, identificacao string, status string, ultimaAtualizacao string) error {
+func (puc *pedidoUseCase) AtualizarStatusPedido(c context.Context, identificacao int, status string, ultimaAtualizacao time.Time) error {
 	return puc.pedidoRepository.AtualizarStatusPedido(c, identificacao, status, ultimaAtualizacao)
 }

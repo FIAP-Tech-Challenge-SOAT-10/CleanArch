@@ -1,23 +1,21 @@
 package route
 
 import (
-	handler "lanchonete/internal/interfaces/http/handlers"
+	"database/sql"
 	"lanchonete/bootstrap"
-	"lanchonete/internal/infrastructure/repository"
-	"lanchonete/infra/database/mongo"
+	repo "lanchonete/infra/database/repositories"
 	"lanchonete/internal/application/usecases"
+	handler "lanchonete/internal/interfaces/http/handlers"
 
 	"github.com/gin-gonic/gin"
 )
 
 // NewClienteRouter creates and configures all cliente-related routes
-func NewClienteRouter(env *bootstrap.Env, db mongo.Database, router *gin.RouterGroup) {
-	// Criar fábricas
-	repositorioFactory := repository.NovoRepositorioFactory(db)
-	
+func NewClienteRouter(env *bootstrap.Env, db *sql.DB, router *gin.RouterGroup) {
+
 	// Criar casos de uso
-	clienteUseCase := usecases.NewClienteUseCase(repositorioFactory.CriarClienteRepository())
-	
+	clienteUseCase := usecases.NewClienteUseCase(repo.NewClienteMysqlRepository(db))
+
 	cc := &handler.ClienteHandler{
 		ClienteUseCase: clienteUseCase,
 	}

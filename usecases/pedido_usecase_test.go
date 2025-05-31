@@ -5,6 +5,7 @@ import (
 	"errors"
 	"lanchonete/internal/domain/entities"
 	"testing"
+	"time"
 )
 
 // MockPedidoRepository implements repository.PedidoRepository for testing
@@ -15,7 +16,11 @@ type MockPedidoRepository struct {
 func (m *MockPedidoRepository) CriarPedido(ctx context.Context, pedido *entities.Pedido) error {
 	// Simulate duplicate check
 	for _, p := range m.Pedidos {
-		if p.Identificacao == pedido.Identificacao {
+		if pedido.ID == 0 {
+			pedido.ID = len(m.Pedidos) + 1
+		}
+
+		if p.ID == pedido.ID {
 			return errors.New("pedido já existe")
 		}
 	}
@@ -23,18 +28,18 @@ func (m *MockPedidoRepository) CriarPedido(ctx context.Context, pedido *entities
 	return nil
 }
 
-func (m *MockPedidoRepository) BuscarPedido(ctx context.Context, id string) (*entities.Pedido, error) {
+func (m *MockPedidoRepository) BuscarPedido(ctx context.Context, id int) (*entities.Pedido, error) {
 	for _, p := range m.Pedidos {
-		if p.Identificacao == id {
+		if p.ID == id {
 			return p, nil
 		}
 	}
 	return nil, errors.New("pedido não encontrado")
 }
 
-func (m *MockPedidoRepository) AtualizarStatusPedido(ctx context.Context, identificacao string, status string, ultimaAtualizacao string) error {
+func (m *MockPedidoRepository) AtualizarStatusPedido(ctx context.Context, pedidoID int, status string, ultimaAtualizacao time.Time) error {
 	for _, p := range m.Pedidos {
-		if p.Identificacao == identificacao {
+		if p.ID == pedidoID {
 			p.Status = entities.StatusPedido(status)
 			p.UltimaAtualizacao = ultimaAtualizacao
 			return nil
@@ -53,40 +58,36 @@ func TestPedidoUseCase_Run_MultiplePedidos(t *testing.T) {
 
 	// Produtos base (same as in produto test)
 	produtos := []entities.Produto{
-		{Identificacao: "1", Nome: "Hamburguer", Categoria: entities.Lanche, Descricao: "Hamburguer artesanal", Preco: 25.0},
-		{Identificacao: "2", Nome: "Batata Frita", Categoria: entities.Acompanhamento, Descricao: "Batata frita crocante", Preco: 10.0},
-		{Identificacao: "3", Nome: "Refrigerante", Categoria: entities.Bebida, Descricao: "Coca-Cola lata", Preco: 7.5},
+		{Nome: "Hamburguer", Categoria: entities.Lanche, Descricao: "Hamburguer artesanal", Preco: 25.0},
+		{Nome: "Batata Frita", Categoria: entities.Acompanhamento, Descricao: "Batata frita crocante", Preco: 10.0},
+		{Nome: "Refrigerante", Categoria: entities.Bebida, Descricao: "Coca-Cola lata", Preco: 7.5},
 	}
 
 	pedidos := []struct {
-		Cliente        entities.Cliente
-		Produtos       []entities.Produto
-		Personalizacao string
+		Cliente  entities.Cliente
+		Produtos []entities.Produto
 	}{
 		{
-			Cliente:        entities.Cliente{Nome: "João", CPF: "11111111111"},
-			Produtos:       []entities.Produto{produtos[0], produtos[1]},
-			Personalizacao: "Sem cebola",
+			Cliente:  entities.Cliente{Nome: "João", CPF: "11111111111"},
+			Produtos: []entities.Produto{produtos[0], produtos[1]},
 		},
 		{
-			Cliente:        entities.Cliente{Nome: "Maria", CPF: "22222222222"},
-			Produtos:       []entities.Produto{produtos[0], produtos[2]},
-			Personalizacao: "Extra queijo",
+			Cliente:  entities.Cliente{Nome: "Maria", CPF: "22222222222"},
+			Produtos: []entities.Produto{produtos[0], produtos[2]},
 		},
 		{
-			Cliente:        entities.Cliente{Nome: "Pedro", CPF: "33333333333"},
-			Produtos:       []entities.Produto{produtos[0], produtos[1], produtos[2]},
-			Personalizacao: "Bem passado",
+			Cliente:  entities.Cliente{Nome: "Pedro", CPF: "33333333333"},
+			Produtos: []entities.Produto{produtos[0], produtos[1], produtos[2]},
 		},
 	}
 
 	for _, p := range pedidos {
-		id, err := useCase.Run(context.Background(), p.Cliente, p.Produtos, p.Personalizacao)
+		id, err := useCase.Run(context.Background(), p.Cliente.CPF, p.Produtos)
 		if err != nil {
-			t.Fatalf("unexpected error for pedido %+v: %v", p, err)
+			t.Fatalf("unexpected error for pedido %+v: %v\n", p, err)
 		}
 		if id == nil {
-			t.Fatalf("expected pedido to be created for %+v", p)
+			t.Fatalf("expected pedido to be created for %+v\n", p)
 		}
 	}
 
@@ -97,11 +98,8 @@ func TestPedidoUseCase_Run_MultiplePedidos(t *testing.T) {
 	// Optionally, check attributes of each created pedido
 	for i, pedido := range mockRepo.Pedidos {
 		expected := pedidos[i]
-		if pedido.Cliente.Nome != expected.Cliente.Nome || pedido.Cliente.CPF != expected.Cliente.CPF {
-			t.Errorf("pedido cliente mismatch: got %+v, want %+v", pedido.Cliente, expected.Cliente)
-		}
-		if pedido.Personalizacao != expected.Personalizacao {
-			t.Errorf("pedido personalizacao mismatch: got %s, want %s", pedido.Personalizacao, expected.Personalizacao)
+		if pedido.ClienteCPF != expected.Cliente.CPF {
+			t.Errorf("pedido cliente mismatch: got %+v, want %+v", pedido.ClienteCPF, expected.Cliente.CPF)
 		}
 		if len(pedido.Produtos) != len(expected.Produtos) {
 			t.Errorf("pedido produtos count mismatch: got %d, want %d", len(pedido.Produtos), len(expected.Produtos))

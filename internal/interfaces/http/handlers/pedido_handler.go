@@ -8,6 +8,7 @@ import (
 	response "lanchonete/internal/interfaces/http/responses"
 	"lanchonete/usecases"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -46,28 +47,35 @@ func NewPedidoHandler(pedidoIncluirUseCase usecases.PedidoIncluirUseCase,
 // @Failure 400 {object} response.ErrorResponse
 func (h *PedidoHandler) CriarPedido(r *gin.Context) {
 	var pedido entities.Pedido
+	fmt.Println("Handler Criando pedido", pedido)
 	err := json.NewDecoder(r.Request.Body).Decode(&pedido)
+	fmt.Println("Handler Criando Depois pedido", pedido)
 	if err != nil {
 		r.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 		return
 	}
 
+	// Substituir o array de produtos com os dados completos do banco
+	produtosCompletos := []entities.Produto{}
+
 	for _, produto := range pedido.Produtos {
-		fmt.Println(produto.Identificacao)
-		_, err = h.ProdutoBuscarPorIdUseCase.Run(r, produto.Identificacao)
+		pBanco, err := h.ProdutoBuscarPorIdUseCase.Run(r, produto.ID)
 		if err != nil {
 			r.JSON(http.StatusBadRequest, response.ErrorResponse{Message: "Produto não Cadastrado!"})
 			return
 		}
+		produtosCompletos = append(produtosCompletos, *pBanco)
 	}
-	ped_ret, err := h.PedidoIncluirUseCase.Run(r, pedido.Cliente, pedido.Produtos, pedido.Personalizacao)
+
+	// Chamar PedidoNew com os produtos completos
+	ped, err := h.PedidoIncluirUseCase.Run(r, pedido.ClienteCPF, produtosCompletos)
 	if err != nil {
 		r.JSON(http.StatusInternalServerError, response.ErrorResponse{Message: err.Error()})
 		return
 	}
 
 	r.JSON(http.StatusOK, response.SuccessResponse{
-		Message: "Pedido criado com sucesso" + ped_ret.Identificacao,
+		Message: "Pedido criado com sucesso" + strconv.Itoa(ped.ID),
 	})
 }
 
@@ -83,7 +91,12 @@ func (h *PedidoHandler) CriarPedido(r *gin.Context) {
 // @Failure 400 {object} response.ErrorResponse
 func (h *PedidoHandler) BuscarPedido(r *gin.Context) {
 	nroPedido := r.Param("nroPedido")
-	pedido, err := h.PedidoBuscarPorIdUseCase.Run(r, nroPedido)
+	id, err := strconv.Atoi(nroPedido)
+	if err != nil {
+		r.JSON(http.StatusBadRequest, response.ErrorResponse{Message: "Número do pedido inválido"})
+		return
+	}
+	pedido, err := h.PedidoBuscarPorIdUseCase.Run(r, id)
 	if err != nil {
 		r.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 		return
@@ -93,7 +106,7 @@ func (h *PedidoHandler) BuscarPedido(r *gin.Context) {
 
 }
 
-// BuscarPedido godoc
+// AtualizarPedido godoc
 // @Summary Atualiza um pedido a partir de sua Identificação
 // @Description Atualizar um pedido
 // @Tags pedido
@@ -106,8 +119,10 @@ func (h *PedidoHandler) BuscarPedido(r *gin.Context) {
 // @Failure 400 {object} response.ErrorResponse
 func (h *PedidoHandler) AtualizarStatusPedido(r *gin.Context) {
 	nroPedido := r.Param("nroPedido")
+	id, _ := strconv.Atoi(nroPedido)
 	status := r.Param("status")
-	err := h.PedidoAtualizarStatusUseCase.Run(r, nroPedido, status)
+	fmt.Println("Atualizando pedido", id, status)
+	err := h.PedidoAtualizarStatusUseCase.Run(r, id, status)
 	if err != nil {
 		r.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 		return

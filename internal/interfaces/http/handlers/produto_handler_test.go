@@ -18,14 +18,14 @@ import (
 // --- Mock UseCases ---
 type MockProdutoIncluirUseCase struct{ mock.Mock }
 
-func (m *MockProdutoIncluirUseCase) Run(c context.Context, identificacao, nome, categoria, descricao string, preco float32) (*entities.Produto, error) {
-	args := m.Called(c, identificacao, nome, categoria, descricao, preco)
+func (m *MockProdutoIncluirUseCase) Run(c context.Context, identificacao string, nome, categoria string, preco float32) (*entities.Produto, error) {
+	args := m.Called(c, identificacao, nome, categoria, preco)
 	return args.Get(0).(*entities.Produto), args.Error(1)
 }
 
 type MockProdutoBuscaPorIdUseCase struct{ mock.Mock }
 
-func (m *MockProdutoBuscaPorIdUseCase) Run(c context.Context, id string) (*entities.Produto, error) {
+func (m *MockProdutoBuscaPorIdUseCase) Run(c context.Context, id int) (*entities.Produto, error) {
 	args := m.Called(c, id)
 	return args.Get(0).(*entities.Produto), args.Error(1)
 }
@@ -39,15 +39,15 @@ func (m *MockProdutoListarTodosUseCase) Run(c context.Context) ([]*entities.Prod
 
 type MockProdutoEditarUseCase struct{ mock.Mock }
 
-func (m *MockProdutoEditarUseCase) Run(c context.Context, identificacao, nome, categoria, descricao string, preco float32) (*entities.Produto, error) {
-	args := m.Called(c, identificacao, nome, categoria, descricao, preco)
+func (m *MockProdutoEditarUseCase) Run(c context.Context, id int, nome, categoria, descricao string, preco float32) (*entities.Produto, error) {
+	args := m.Called(c, id, nome, categoria, descricao, preco)
 	return args.Get(0).(*entities.Produto), args.Error(1)
 }
 
 type MockProdutoRemoverUseCase struct{ mock.Mock }
 
-func (m *MockProdutoRemoverUseCase) Run(c context.Context, identificacao string) error {
-	args := m.Called(c, identificacao)
+func (m *MockProdutoRemoverUseCase) Run(c context.Context, id int) error {
+	args := m.Called(c, id)
 	return args.Error(0)
 }
 
@@ -68,13 +68,12 @@ func TestProdutoHandler_ProdutoIncluir(t *testing.T) {
 	}
 
 	prod := entities.Produto{
-		Identificacao: "1",
-		Nome:          "Coca-Cola",
-		Categoria:     "Bebida",
-		Descricao:     "Refrigerante",
-		Preco:         5.0,
+		Nome:      "Coca-Cola",
+		Categoria: "Bebida",
+		Descricao: "Refrigerante",
+		Preco:     5.0,
 	}
-	mockUC.On("Run", mock.Anything, prod.Identificacao, prod.Nome, string(prod.Categoria), prod.Descricao, prod.Preco).
+	mockUC.On("Run", mock.Anything, prod.Nome, string(prod.Categoria), prod.Descricao, prod.Preco).
 		Return(&prod, nil)
 
 	body, _ := json.Marshal(prod)
@@ -96,8 +95,8 @@ func TestProdutoHandler_ProdutoBuscarPorId(t *testing.T) {
 		ProdutoBuscarPorIdUseCase: mockUC,
 	}
 
-	prod := &entities.Produto{Identificacao: "1", Nome: "Coca-Cola"}
-	mockUC.On("Run", mock.Anything, "1").Return(prod, nil)
+	prod := &entities.Produto{Nome: "Coca-Cola"}
+	mockUC.On("Run", mock.Anything, 1).Return(prod, nil)
 
 	req, _ := http.NewRequest(http.MethodGet, "/produto/1", nil)
 	w := httptest.NewRecorder()
@@ -117,7 +116,7 @@ func TestProdutoHandler_ProdutoListarTodos(t *testing.T) {
 		ProdutoListarTodosUseCase: mockUC,
 	}
 
-	prods := []*entities.Produto{{Identificacao: "1", Nome: "Coca-Cola"}}
+	prods := []*entities.Produto{{Nome: "Coca-Cola"}}
 	mockUC.On("Run", mock.Anything).Return(prods, nil)
 
 	req, _ := http.NewRequest(http.MethodGet, "/produtos", nil)
@@ -138,13 +137,13 @@ func TestProdutoHandler_ProdutoEditar(t *testing.T) {
 	}
 
 	prod := entities.Produto{
-		Identificacao: "1",
-		Nome:          "Coca-Cola",
-		Categoria:     "Bebida",
-		Descricao:     "Refrigerante",
-		Preco:         5.0,
+		ID:        1,
+		Nome:      "Coca-Cola",
+		Categoria: "Bebida",
+		Descricao: "Refrigerante",
+		Preco:     5.0,
 	}
-	mockUC.On("Run", mock.Anything, prod.Identificacao, prod.Nome, string(prod.Categoria), prod.Descricao, prod.Preco).
+	mockUC.On("Run", mock.Anything, 1, prod.Nome, string(prod.Categoria), prod.Descricao, prod.Preco).
 		Return(&prod, nil)
 
 	body, _ := json.Marshal(prod)
@@ -166,7 +165,7 @@ func TestProdutoHandler_ProdutoRemover(t *testing.T) {
 		ProdutoRemoverUseCase: mockUC,
 	}
 
-	mockUC.On("Run", mock.Anything, "1").Return(nil)
+	mockUC.On("Run", mock.Anything, 1).Return(nil)
 
 	req, _ := http.NewRequest(http.MethodDelete, "/produto/1", nil)
 	w := httptest.NewRecorder()
@@ -186,7 +185,7 @@ func TestProdutoHandler_ProdutoListarPorCategoria(t *testing.T) {
 		ProdutoListarPorCategoriaUseCase: mockUC,
 	}
 
-	prods := []*entities.Produto{{Identificacao: "1", Nome: "Coca-Cola", Categoria: "Bebida"}}
+	prods := []*entities.Produto{{Nome: "Coca-Cola", Categoria: "Bebida"}}
 	mockUC.On("Run", mock.Anything, "Bebida").Return(prods, nil)
 
 	req, _ := http.NewRequest(http.MethodGet, "/produtos/Bebida", nil)

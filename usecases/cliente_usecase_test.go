@@ -22,13 +22,13 @@ func (m *MockClienteRepository) CriarCliente(ctx context.Context, cliente *entit
 	return nil
 }
 
-func (m *MockClienteRepository) BuscarCliente(ctx context.Context, cpf string) (entities.Cliente, error) {
+func (m *MockClienteRepository) BuscarCliente(ctx context.Context, cpf string) (*entities.Cliente, error) {
 	for _, c := range m.clientes {
 		if c.CPF == cpf {
-			return *c, nil
+			return c, nil
 		}
 	}
-	return entities.Cliente{}, errors.New("cliente não encontrado")
+	return &entities.Cliente{}, errors.New("cliente não encontrado")
 }
 
 // ClienteUseCaseImpl implements ClienteUseCase for testing
@@ -41,7 +41,11 @@ func (uc *ClienteUseCaseImpl) CriarCliente(c context.Context, cliente *entities.
 }
 
 func (uc *ClienteUseCaseImpl) BuscarCliente(c context.Context, cpf string) (entities.Cliente, error) {
-	return uc.repo.BuscarCliente(c, cpf)
+	cliente, err := uc.repo.BuscarCliente(c, cpf)
+	if err != nil {
+		return entities.Cliente{}, err
+	}
+	return *cliente, nil
 }
 
 func TestClienteUseCase_CriarEBuscarCliente(t *testing.T) {

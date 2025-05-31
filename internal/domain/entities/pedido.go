@@ -1,7 +1,9 @@
 package entities
 
 import (
+	"encoding/binary"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,72 +20,58 @@ const (
 )
 
 type Pedido struct {
-	Identificacao     string			`json:"identificacao"`
-	Cliente			  Cliente			`json:"cliente"`	
-	Produtos          []Produto			`json:"produtos"`
-	Personalizacao	  string			`json:"personalizacao"`
-	Status            StatusPedido		`json:"status"`
-	StatusPagamento   string			`json:"statusPagamento"`
-	TimeStamp         string			`json:"timeStamp" format:"date-time"`
-	UltimaAtualizacao string			`json:"ultimaAtualizacao" format:"date-time"`
-	Total             float32			`json:"total"`
+	ID                int          `json:"id,omitempty"`
+	ClienteCPF        string       `json:"cliente_cpf"`
+	Status            StatusPedido `json:"status"`
+	StatusPagamento   string       `json:"status_pagamento"`
+	TimeStamp         string       `json:"time_stamp"`
+	UltimaAtualizacao time.Time    `json:"ultima_atualizacao"`
+	Total             float32      `json:"total"`
+	Produtos          []Produto    `json:"produtos"`
 }
 
-func PedidoNew(cliente Cliente, produtos []Produto, personalizacao string) (*Pedido, error) {
+func PedidoNew(clienteCPF string, produtos []Produto) (*Pedido, error) {
 	id := uuid.New()
-	id_string := id.String()
+	intID := int(binary.BigEndian.Uint32(id[:4])) // Uses only the first 4 bytes
+	fmt.Println("Pedido Entity: ", produtos)
 	if len(produtos) == 0 {
 		return nil, errors.New("o pedido precisa ter ao menos um produto")
 	}
 
 	temLanche := false
+	total := float32(0)
 	for _, produto := range produtos {
+		total += produto.Preco
 		if produto.Categoria == Lanche {
 			temLanche = true
-			break
 		}
 	}
+
 	if !temLanche {
 		return nil, errors.New("o pedido precisa ter ao menos um lanche")
 	}
 
-	total := float32(0)
-	for _, produto := range produtos {
-		total += produto.Preco
-	}
-
-	local, err := time.LoadLocation("America/Sao_Paulo")
-	if err != nil {
-		return nil, errors.New("erro ao carregar localização")
-	}
-	agora := time.Now().In(local).Format("2006-01-02 15:04:05")
+	now := time.Now()
 
 	return &Pedido{
-		Identificacao:     id_string,
-		Cliente:           cliente,
-		Produtos:          produtos,
-		Personalizacao:    personalizacao,
+		ID:                intID,
+		ClienteCPF:        clienteCPF,
 		Status:            Pendente,
 		StatusPagamento:   "Pendente",
-		TimeStamp:         agora,
-		UltimaAtualizacao: agora,
+		TimeStamp:         "00:15:00",
+		UltimaAtualizacao: now,
 		Total:             total,
+		Produtos:          produtos,
 	}, nil
 }
 
-func (p *Pedido) UpdateStatus(status StatusPedido) (ultimaAtualizacao string, err error) {
+func (p *Pedido) UpdateStatus(status StatusPedido) error {
 	switch status {
 	case Recebido, EmPreparacao, Pronto, Finalizado:
 		p.Status = status
+		p.UltimaAtualizacao = time.Now()
+		return nil
 	default:
-		return "", errors.New("status inválido")
+		return errors.New("status inválido")
 	}
-	local, err := time.LoadLocation("America/Sao_Paulo")
-	if err != nil {
-		return "", errors.New("erro ao carregar localização")
-	}
-	agora := time.Now().In(local).Format("2006-01-02 15:04:05")
-	p.UltimaAtualizacao = agora
-
-	return p.UltimaAtualizacao, nil
 }

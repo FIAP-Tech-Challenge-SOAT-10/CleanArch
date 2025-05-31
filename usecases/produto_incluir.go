@@ -8,7 +8,7 @@ import (
 )
 
 type ProdutoIncluirUseCase interface {
-	Run(ctx context.Context, identificacao, nome, categoria, descricao string, preco float32) (*entities.Produto, error)
+	Run(ctx context.Context, nome, categoria, descricao string, preco float32) (*entities.Produto, error)
 }
 
 type produtoIncluirUseCase struct {
@@ -21,9 +21,9 @@ func NewProdutoIncluirUseCase(produtoRepository repository.ProdutoRepository) Pr
 	}
 }
 
-func (pd *produtoIncluirUseCase) Run(c context.Context, identificacao string, nome string, categoria string, descricao string, preco float32) (*entities.Produto, error) {
+func (pd *produtoIncluirUseCase) Run(c context.Context, nome string, categoria string, descricao string, preco float32) (*entities.Produto, error) {
 
-	produto, err := entities.ProdutoNew(identificacao, nome, categoria, descricao, preco)
+	produto, err := entities.ProdutoNew(nome, categoria, descricao, preco)
 
 	if err != nil {
 		return nil, fmt.Errorf("criação de produto inválida: %w", err)
@@ -32,7 +32,6 @@ func (pd *produtoIncluirUseCase) Run(c context.Context, identificacao string, no
 	err = pd.produtoRepository.AdicionarProduto(c, produto)
 	if err != nil {
 		return nil, fmt.Errorf("não foi possível criar produto: %w", err)
-
 	}
 
 	return produto, nil

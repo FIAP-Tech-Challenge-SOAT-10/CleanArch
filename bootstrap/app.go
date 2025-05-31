@@ -2,14 +2,16 @@ package bootstrap
 
 import (
 	"context"
+	"database/sql"
+	"log"
 
+	"lanchonete/infra/database"
 	"lanchonete/internal/domain/repository"
-	"lanchonete/infra/database/mongo"
 )
 
 type App struct {
-	Env                    *Env
-	DB                     mongo.Database
+	Env                      *Env
+	DB                       *sql.DB
 	AcompanhamentoRepository repository.AcompanhamentoRepository
 	PedidoRepository         repository.PedidoRepository
 	ProdutoRepository        repository.ProdutoRepository
@@ -20,19 +22,25 @@ type App struct {
 func NewApp(ctx context.Context) (*App, error) {
 	// Load environment variables
 	env := NewEnv()
-	
-	// Initialize database
-	db, err := NewDatabase(ctx, env)
+
+	db, err := database.NewMySQLConnection(
+		env.DBUser,
+		env.DBPass,
+		env.DBHost,
+		env.DBPort,
+		env.DBName,
+	)
+
 	if err != nil {
-		return nil, err
+		log.Fatalf("erro ao conectar ao MySQL: %v", err)
 	}
 
 	// Initialize repositories
 	acompanhamentoRepo, pedidoRepo, produtoRepo, clienteRepo, pagamentoRepo := NewRepositories(db)
 
 	return &App{
-		Env:                    env,
-		DB:                     db,
+		Env:                      env,
+		DB:                       db,
 		AcompanhamentoRepository: acompanhamentoRepo,
 		PedidoRepository:         pedidoRepo,
 		ProdutoRepository:        produtoRepo,

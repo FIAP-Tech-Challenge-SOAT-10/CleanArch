@@ -8,7 +8,7 @@ import (
 )
 
 type ProdutoBuscaPorIdUseCase interface {
-	Run(ctx context.Context, id string) (*entities.Produto, error)
+	Run(ctx context.Context, id int) (*entities.Produto, error)
 }
 
 type produtoBuscaPorIdUseCase struct {
@@ -21,7 +21,7 @@ func NewProdutoBuscaPorIdUseCase(produtoRepo repository.ProdutoRepository) Produ
 	}
 }
 
-func (pd *produtoBuscaPorIdUseCase) Run(c context.Context, id string) (*entities.Produto, error) {
+func (pd *produtoBuscaPorIdUseCase) Run(c context.Context, id int) (*entities.Produto, error) {
 	produto, err := pd.produtoRepo.BuscarProdutoPorId(c, id)
 
 	if err != nil {

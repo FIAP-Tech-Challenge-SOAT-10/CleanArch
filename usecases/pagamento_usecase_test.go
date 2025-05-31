@@ -55,7 +55,7 @@ func TestPagamentoUseCase_EnviarEConfirmarPagamento(t *testing.T) {
 	enviarUC := &EnviarPagamentoUseCaseImpl{repo: mockRepo}
 	confirmarUC := &ConfirmarPagamentoUseCaseImpl{repo: mockRepo}
 
-	pagamento, err := entities.PagamentoNew("p1", 100.00, "PENDENTE", "2024-05-15T10:00:00Z")
+	pagamento, err := entities.PagamentoNew(1, 1, 100.00, "PENDENTE", "2024-05-15T10:00:00Z")
 	if err != nil {
 		t.Fatalf("erro ao criar pagamento: %v", err)
 	}

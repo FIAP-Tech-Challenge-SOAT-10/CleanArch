@@ -1,9 +1,9 @@
 package route
 
 import (
+	"database/sql"
 	"lanchonete/bootstrap"
-	"lanchonete/infra/database/mongo"
-	"lanchonete/internal/infrastructure/repository"
+	repo "lanchonete/infra/database/repositories"
 	handler "lanchonete/internal/interfaces/http/handlers"
 	"lanchonete/usecases"
 
@@ -11,10 +11,9 @@ import (
 )
 
 // NewProdutoRouter creates and configures all produto-related routes
-func NewProdutoRouter(env *bootstrap.Env, db mongo.Database, router *gin.RouterGroup) {
+func NewProdutoRouter(env *bootstrap.Env, db *sql.DB, router *gin.RouterGroup) {
 	// Create repository using the repository factory
-	repositorioFactory := repository.NovoRepositorioFactory(db)
-	produtoRepo := repositorioFactory.CriarProdutoRepository()
+	produtoRepo := repo.NewProdutoMysqlRepository(db)
 
 	pc := &handler.ProdutoHandler{
 		ProdutoIncluirUseCase:            usecases.NewProdutoIncluirUseCase(produtoRepo),
@@ -25,10 +24,10 @@ func NewProdutoRouter(env *bootstrap.Env, db mongo.Database, router *gin.RouterG
 		ProdutoListarPorCategoriaUseCase: usecases.NewProdutoListarPorCategoriaUseCase(produtoRepo),
 	}
 
-	router.POST("/produto", pc.ProdutoIncluir)
-	router.GET("/produto/:id", pc.ProdutoBuscarPorId)
+	router.POST("/produtos", pc.ProdutoIncluir)
+	router.GET("/produtos/:id", pc.ProdutoBuscarPorId)
 	router.GET("/produtos", pc.ProdutoListarTodos)
 	router.GET("/produtos/:categoria", pc.ProdutoListarPorCategoria)
-	router.POST("/produto/editar", pc.ProdutoEditar)
-	router.DELETE("/produto/:id", pc.ProdutoRemover)
+	router.PUT("/produtos/editar", pc.ProdutoEditar)
+	router.DELETE("/produtos/:id", pc.ProdutoRemover)
 }
