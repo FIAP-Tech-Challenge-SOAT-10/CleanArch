@@ -147,6 +147,10 @@ CREATE TABLE Acompanhamento_Pedido (
 
 ---
 
+## Pipeline de Integração Contínua (CI/CD)
+
+Este projeto pode ser integrado a uma pipeline de CI/CD para garantir a qualidade do código e facilitar o deploy. O projeto gera um artefato chamado programa, e também faz deploy de uma imagem no docker hub: brunolaraujo/10soat_tc03.
+
 ## Licença
 
 Este projeto é parte de um desafio técnico e possui fins educacionais.
