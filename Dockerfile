@@ -1,6 +1,6 @@
 # Etapa 1: build da aplicação
-FROM golang:1.23.7-alpine AS builder
-
+# FROM golang:1.23.7-alpine AS builder
+FROM golang:1.24.9-alpine AS builder
 # Instala ferramentas essenciais (ex: swag, se necessário)
 RUN apk add --no-cache git
 

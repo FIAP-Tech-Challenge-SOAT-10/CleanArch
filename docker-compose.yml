@@ -6,10 +6,10 @@ services:
     container_name: mysql_local
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: lanchonete
-      MYSQL_USER: estudantefiap
-      MYSQL_PASSWORD: zhw132TNvXY8Rm
+      MYSQL_ROOT_PASSWORD: ${{ secrets.DB_ROOT_PASSWORD }}
+      MYSQL_DATABASE: ${{ secrets.DB_NAME }}
+      MYSQL_USER: ${{ secrets.DB_USER }}
+      MYSQL_PASSWORD: ${{ secrets.DB_PASSWORD }}
     ports:
       - "3306:3306"
     volumes:
