@@ -1,12 +1,9 @@
 package entities
 
 import (
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type StatusPedido string
@@ -31,8 +28,6 @@ type Pedido struct {
 }
 
 func PedidoNew(clienteCPF string, produtos []Produto) (*Pedido, error) {
-	id := uuid.New()
-	intID := int(binary.BigEndian.Uint32(id[:4])) // Uses only the first 4 bytes
 	fmt.Println("Pedido Entity: ", produtos)
 	if len(produtos) == 0 {
 		return nil, errors.New("o pedido precisa ter ao menos um produto")
@@ -54,7 +49,6 @@ func PedidoNew(clienteCPF string, produtos []Produto) (*Pedido, error) {
 	now := time.Now()
 
 	return &Pedido{
-		ID:                intID,
 		ClienteCPF:        clienteCPF,
 		Status:            Pendente,
 		StatusPagamento:   "Pendente",
