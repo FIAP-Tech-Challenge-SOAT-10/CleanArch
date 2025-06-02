@@ -36,6 +36,6 @@ jobs:
     # Push is a shorthand for --output=type=registry
         push: true
     # List of tags
-        tags: brunolaraujo/10SOAT_TC03:${{ github.run_number}}
+        tags: brunolaraujo/10soat_tc03:${{ github.run_number}}
 
         
